@@ -1,0 +1,165 @@
+# InDesign Planner Generator - Git Ignore File
+
+# =============================================================================
+# InDesign Files
+# =============================================================================
+
+# InDesign Documents (keep templates, ignore working files)
+*.indd
+*.idml
+*.indt
+*.indl
+*.inx
+
+# InDesign Lock Files
+*.lnk
+
+# InDesign Recovery Files
+*recovery*
+*~recovery*
+
+# InDesign Cache Files
+*.idlk
+
+# =============================================================================
+# ExtendScript and Adobe Files  
+# =============================================================================
+
+# ExtendScript Toolkit Files
+*.estk
+*.log
+
+# Adobe Preferences
+.adobe/
+
+# Script Log Files
+*.txt
+script_log*.txt
+
+# =============================================================================
+# Generated Files and Outputs
+# =============================================================================
+
+# Generated QR Code Files
+*.svg
+temp_qr_*.svg
+planner_qr_*.svg
+
+# Generated PDF Exports
+exports/
+output/
+*.pdf
+
+# Temporary Files
+temp/
+tmp/
+*.tmp
+
+# Test Documents
+test_*.indd
+sample_*.indd
+demo_*.indd
+
+# =============================================================================
+# Documentation Backups
+# =============================================================================
+
+# Documentation backup files (created by update-docs.sh)
+docs/*.backup.*
+*.backup.*
+
+# =============================================================================
+# System Files
+# =============================================================================
+
+# macOS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Windows
+Desktop.ini
+$RECYCLE.BIN/
+
+# Linux
+*~
+
+# =============================================================================
+# Development and IDE Files
+# =============================================================================
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Atom
+.atom/
+
+# IntelliJ / WebStorm
+.idea/
+*.iml
+
+# =============================================================================
+# Version Control
+# =============================================================================
+
+# Git
+.git/
+*.orig
+
+# =============================================================================
+# Archive and Compression
+# =============================================================================
+
+# Archives
+*.zip
+*.rar
+*.tar
+*.tar.gz
+*.7z
+
+# =============================================================================
+# Project Specific
+# =============================================================================
+
+# User-specific test files
+my_test_*
+personal_*
+
+# Large sample files
+samples/large/
+examples/oversized/
+
+# Private development notes
+notes/private/
+todo_personal.md
+
+# =============================================================================
+# Keep These Files (Explicit Includes)
+# =============================================================================
+
+# Core Script Files (keep these)
+!mainVersion*.jsx
+!createMonthlyTabs.jsx
+!lib/**/*.jsx
+
+# Documentation (keep these)
+!docs/**/*.md
+!README.md
+!LICENSE
+
+# Scripts (keep these)
+!scripts/*.sh
+!scripts/*.bat
+
+# Examples and Templates (keep small ones)
+!examples/templates/
+!examples/*.jsx
