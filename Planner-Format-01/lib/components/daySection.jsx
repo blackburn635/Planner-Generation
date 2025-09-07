@@ -67,6 +67,9 @@ var DaySection = (function() {
             // Apply font selection to "Things To Do" text (Paper color for text on colored background)
             Utils.applyTextFormatting(todoText.texts.item(0), userPrefs.contentFont, "Paper");
             
+            // ADD THIS LINE: Right-justify the "Things To Do" text
+            todoText.texts.item(0).justification = Justification.RIGHT_ALIGN;
+
             // Properly set the vertical justification for text frames
             Utils.setupTextFrame(todoText);
             
