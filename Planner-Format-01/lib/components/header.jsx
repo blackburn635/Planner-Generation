@@ -1,9 +1,17 @@
+// Planner-Format-01/lib/components/header.jsx
+
 /*******************************************************************************
- * Header Component
+ * Enhanced Header Component
  * 
  * Creates headers for weekly and monthly spreads, including:
  * - Week date range headers
  * - Monthly calendar headers with year display
+ * 
+ * ENHANCED IN V03:
+ * - Uses granular "Page Title Headers" font settings
+ * - Supports user-defined font sizes
+ * - Maintains backward compatibility
+ * - Enhanced error handling and formatting
  *******************************************************************************/
 
 var Header = (function() {
@@ -13,7 +21,7 @@ var Header = (function() {
      * @param {Date} startDate - First day of the week
      * @param {Date} endDate - Last day of the week
      * @param {Object} pageMetrics - Page size and margin information
-     * @param {Object} userPrefs - User preferences for fonts and colors
+     * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
     function createWeekHeader(page, startDate, endDate, pageMetrics, userPrefs) {
         try {
@@ -27,27 +35,41 @@ var Header = (function() {
                 contents: "Week of " + Utils.formatDate(startDate) + " - " + Utils.formatDate(endDate)
             });
             
-            // Apply formatting using the titleFont
+            // Apply enhanced formatting using Page Title Headers settings
             try {
-                // Apply title font and color
-                Utils.applyTextFormatting(headerText.texts.item(0), userPrefs.titleFont, userPrefs.titleFontColor);
+                // NEW IN V03: Use granular Page Title Headers font settings
+                var font = userPrefs.pageTitleFont || userPrefs.titleFont || "Minion Pro";
+                var color = userPrefs.pageTitleColor || userPrefs.titleFontColor || "Black";
+                var size = userPrefs.pageTitleSize || 14; // Default to 14pt for week headers if not specified
                 
-                // Apply formatting to make the header stand out
-                headerText.texts.item(0).pointSize = 14;
+                // Apply font and color
+                Utils.applyTextFormatting(headerText.texts.item(0), font, color);
+                
+                // Apply point size
+                headerText.texts.item(0).pointSize = size;
+                
+                // Apply center alignment
                 headerText.texts.item(0).justification = Justification.CENTER_ALIGN;
                 
                 // Try to apply bold formatting if available, otherwise skip it
                 try {
                     headerText.texts.item(0).fontStyle = "Bold";
-                } catch (e) {
+                } catch (styleError) {
                     // Font style not available, continue without changing style
+                    $.writeln("[Header] Bold style not available for font: " + font);
                 }
-            } catch (e) {
-                throw new Error("Error applying header formatting: " + e.message);
+                
+            } catch (formatError) {
+                throw new Error("Error applying week header formatting: " + formatError.message);
             }
             
-            // Set up text frame properties
+            // Set up text frame properties for proper vertical centering
             Utils.setupTextFrame(headerText);
+            
+            $.writeln("[Header] Week header created with font: " + 
+                     (userPrefs.pageTitleFont || userPrefs.titleFont) + 
+                     ", size: " + (userPrefs.pageTitleSize || 14) + "pt");
+            
         } catch (e) {
             throw new Error("Error creating week header: " + e.message);
         }
@@ -59,7 +81,7 @@ var Header = (function() {
      * @param {Page} rightPage - Right page of the spread
      * @param {Date} monthDate - First day of the month
      * @param {Object} pageMetrics - Page size and margin information
-     * @param {Object} userPrefs - User preferences for fonts and colors
+     * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
     function createMonthHeader(leftPage, rightPage, monthDate, pageMetrics, userPrefs) {
         try {
@@ -67,6 +89,12 @@ var Header = (function() {
                               "July", "August", "September", "October", "November", "December"];
             var monthName = monthNames[monthDate.getMonth()];
             var yearText = monthDate.getFullYear().toString();
+            var fullHeaderText = monthName + " " + yearText;
+            
+            // NEW IN V03: Use granular Page Title Headers font settings
+            var font = userPrefs.pageTitleFont || userPrefs.titleFont || "Minion Pro";
+            var color = userPrefs.pageTitleColor || userPrefs.titleFontColor || "Black";
+            var size = userPrefs.pageTitleSize || 18; // Default to 18pt for month headers if not specified
             
             // Create month and year text centered on left page
             var leftMonthText = leftPage.textFrames.add({
@@ -76,19 +104,27 @@ var Header = (function() {
                     pageMetrics.margins.top,
                     leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: monthName + " " + yearText  // Combine month and year
+                contents: fullHeaderText
             });
             
-            // Apply formatting
-            Utils.applyTextFormatting(leftMonthText.texts.item(0), userPrefs.titleFont, userPrefs.titleFontColor);
-            leftMonthText.texts.item(0).pointSize = 18;
-            leftMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+            // Apply enhanced formatting to left page header
             try {
-                leftMonthText.texts.item(0).fontStyle = "Bold";
-            } catch (e) {
-                // Font style not available, continue without changing style
+                Utils.applyTextFormatting(leftMonthText.texts.item(0), font, color);
+                leftMonthText.texts.item(0).pointSize = size;
+                leftMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+                
+                // Try to apply bold formatting if available
+                try {
+                    leftMonthText.texts.item(0).fontStyle = "Bold";
+                } catch (styleError) {
+                    $.writeln("[Header] Bold style not available for font: " + font);
+                }
+                
+                Utils.setupTextFrame(leftMonthText);
+                
+            } catch (leftFormatError) {
+                throw new Error("Error formatting left month header: " + leftFormatError.message);
             }
-            Utils.setupTextFrame(leftMonthText);
             
             // Create month and year text centered on right page
             var rightMonthText = rightPage.textFrames.add({
@@ -98,28 +134,106 @@ var Header = (function() {
                     pageMetrics.margins.top,
                     rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: monthName + " " + yearText  // Combine month and year
+                contents: fullHeaderText
             });
             
-            // Apply formatting
-            Utils.applyTextFormatting(rightMonthText.texts.item(0), userPrefs.titleFont, userPrefs.titleFontColor);
-            rightMonthText.texts.item(0).pointSize = 18;
-            rightMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+            // Apply enhanced formatting to right page header
             try {
-                rightMonthText.texts.item(0).fontStyle = "Bold";
-            } catch (e) {
-                // Font style not available, continue without changing style
+                Utils.applyTextFormatting(rightMonthText.texts.item(0), font, color);
+                rightMonthText.texts.item(0).pointSize = size;
+                rightMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+                
+                // Try to apply bold formatting if available
+                try {
+                    rightMonthText.texts.item(0).fontStyle = "Bold";
+                } catch (styleError) {
+                    $.writeln("[Header] Bold style not available for font: " + font);
+                }
+                
+                Utils.setupTextFrame(rightMonthText);
+                
+            } catch (rightFormatError) {
+                throw new Error("Error formatting right month header: " + rightFormatError.message);
             }
-            Utils.setupTextFrame(rightMonthText);
+            
+            $.writeln("[Header] Month headers created for " + fullHeaderText + 
+                     " with font: " + font + ", size: " + size + "pt");
             
         } catch (e) {
             throw new Error("Error creating month header: " + e.message);
         }
     }
     
+    /**
+     * NEW IN V03: Helper function to get effective font settings with fallbacks
+     * @param {Object} userPrefs - Enhanced user preferences
+     * @param {String} defaultFont - Default font to use as final fallback
+     * @param {String} defaultColor - Default color to use as final fallback
+     * @param {Number} defaultSize - Default size to use as final fallback
+     * @returns {Object} Object with font, color, and size properties
+     */
+    function getEffectiveFontSettings(userPrefs, defaultFont, defaultColor, defaultSize) {
+        return {
+            font: userPrefs.pageTitleFont || userPrefs.titleFont || defaultFont,
+            color: userPrefs.pageTitleColor || userPrefs.titleFontColor || defaultColor,
+            size: userPrefs.pageTitleSize || defaultSize
+        };
+    }
+    
+    /**
+     * NEW IN V03: Creates a header with enhanced formatting options
+     * @param {Page} page - The page to add the header to
+     * @param {String} content - The text content for the header
+     * @param {Array} bounds - Geometric bounds for the header [y1, x1, y2, x2]
+     * @param {Object} userPrefs - Enhanced user preferences
+     * @param {Object} options - Additional formatting options
+     * @returns {TextFrame} The created header text frame
+     */
+    function createEnhancedHeader(page, content, bounds, userPrefs, options) {
+        options = options || {};
+        
+        try {
+            var headerText = page.textFrames.add({
+                geometricBounds: bounds,
+                contents: content
+            });
+            
+            // Get effective font settings
+            var fontSettings = getEffectiveFontSettings(
+                userPrefs, 
+                options.defaultFont || "Minion Pro",
+                options.defaultColor || "Black",
+                options.defaultSize || 16
+            );
+            
+            // Apply formatting
+            Utils.applyTextFormatting(headerText.texts.item(0), fontSettings.font, fontSettings.color);
+            headerText.texts.item(0).pointSize = fontSettings.size;
+            headerText.texts.item(0).justification = options.justification || Justification.CENTER_ALIGN;
+            
+            // Apply bold if requested and available
+            if (options.bold !== false) { // Default to true unless explicitly set to false
+                try {
+                    headerText.texts.item(0).fontStyle = "Bold";
+                } catch (styleError) {
+                    $.writeln("[Header] Bold style not available for font: " + fontSettings.font);
+                }
+            }
+            
+            Utils.setupTextFrame(headerText);
+            
+            return headerText;
+            
+        } catch (e) {
+            throw new Error("Error creating enhanced header: " + e.message);
+        }
+    }
+    
     // Return public interface
     return {
         createWeekHeader: createWeekHeader,
-        createMonthHeader: createMonthHeader
+        createMonthHeader: createMonthHeader,
+        createEnhancedHeader: createEnhancedHeader,
+        getEffectiveFontSettings: getEffectiveFontSettings
     };
 })();

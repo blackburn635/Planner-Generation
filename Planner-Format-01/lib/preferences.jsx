@@ -1,170 +1,293 @@
+// Planner-Format-01/lib/preferences.jsx
+
 /*******************************************************************************
- * Preferences Module
+ * Enhanced Preferences Module
  * 
- * Handles user preferences for the planner application:
- * - Creates and manages the preferences dialog
- * - Stores and retrieves user preferences
- * - Provides defaults when preferences aren't specified
+ * Handles enhanced user preferences for the planner application:
+ * - Test mode (10 pages only)
+ * - Flexible date range with duration
+ * - Granular font control (5 categories)
+ * - All existing functionality preserved
  *******************************************************************************/
 
 var Preferences = (function() {
     /**
-     * Creates a dialog box to get user preferences for the planner
+     * Creates enhanced dialog to get user preferences for the planner
      * @param {Document} doc - The InDesign document
-     * @returns {Object} User preferences or null if canceled
+     * @returns {Object} Enhanced user preferences or null if canceled
      */
     function getUserPreferences(doc) {
-        // Let's create a dialog that works reliably with InDesign
-        var dialog = app.dialogs.add({name: "Planner Preferences"});
+        var dialog = app.dialogs.add({name: "Enhanced Planner Preferences"});
         
-        // Get all available fonts - this time using everyItem() which worked in the first version
+        // Get all available fonts
         var fontArray = [];
         try {
             fontArray = app.fonts.everyItem().name;
         } catch (e) {
-            // Fallback to basic fonts if we can't get the list
             fontArray = ["Minion Pro", "Myriad Pro", "Arial", "Helvetica", "Times New Roman", "Georgia"];
         }
         
-        // Get existing document colors for dropdown menus
-        var docColors = ColorManager.getAvailableColors(doc);
-        
-        // Build the dialog
+        // Get existing document colors
+        var docColors = [];
         try {
-            // Create column for dialog
+            for (var i = 0; i < doc.colors.length; i++) {
+                if (doc.colors[i].name !== "None" && doc.colors[i].name !== "Registration") {
+                    docColors.push(doc.colors[i].name);
+                }
+            }
+        } catch (e) {
+            // Ignore errors when getting colors
+        }
+        
+        try {
             var column = dialog.dialogColumns.add();
             
-            // FONT SECTION
-            column.staticTexts.add({staticLabel: "--- FONT OPTIONS ---"});
-            
-            // Title Font
-            column.staticTexts.add({staticLabel: "Title Font:"});
-            var titleFontDropdown = column.dropdowns.add({
-                stringList: fontArray,
-                selectedIndex: 0
+            // =================================================================
+            // TEST MODE PANEL
+            // =================================================================
+            var testModePanel = column.borderPanels.add();
+            testModePanel.staticTexts.add({staticLabel: "TEST MODE"});
+            var testModeCheckbox = testModePanel.checkboxControls.add({
+                staticLabel: "Test Mode (Generate only 10 pages for testing)",
+                checkedState: false
             });
             
-            // Title font color selection
-            column.staticTexts.add({staticLabel: "Title Font Color:"});
+            // =================================================================
+            // DATE RANGE PANEL
+            // =================================================================
+            var datePanel = column.borderPanels.add();
+            datePanel.staticTexts.add({staticLabel: "DATE RANGE"});
+            
+            var currentDate = new Date();
+            var currentMonth = currentDate.getMonth();
+            var currentYear = currentDate.getFullYear();
+            
+            datePanel.staticTexts.add({staticLabel: "Start Date:"});
+            var monthNames = ["January", "February", "March", "April", "May", "June", 
+                             "July", "August", "September", "October", "November", "December"];
+            
+            datePanel.staticTexts.add({staticLabel: "Month:"});
+            var startMonthDropdown = datePanel.dropdowns.add({
+                stringList: monthNames,
+                selectedIndex: currentMonth
+            });
+            
+            datePanel.staticTexts.add({staticLabel: "Year:"});
+            var yearOptions = [];
+            for (var i = currentYear - 5; i <= currentYear + 5; i++) {
+                yearOptions.push(i.toString());
+            }
+            var startYearDropdown = datePanel.dropdowns.add({
+                stringList: yearOptions,
+                selectedIndex: 5
+            });
+            
+            datePanel.staticTexts.add({staticLabel: "Day:"});
+            var startDayField = datePanel.integerEditboxes.add({
+                editValue: 1,
+                minimumValue: 1,
+                maximumValue: 31
+            });
+            
+            datePanel.staticTexts.add({staticLabel: "Duration (months):"});
+            var durationField = datePanel.integerEditboxes.add({
+                editValue: 12,
+                minimumValue: 1,
+                maximumValue: 60
+            });
+            
+            // =================================================================
+            // FONT SETTINGS - SEPARATE PANELS FOR EACH CATEGORY
+            // =================================================================
             var fontColors = ["Black", "Paper"].concat(docColors);
-            var titleFontColorDropdown = column.dropdowns.add({
-                stringList: fontColors,
-                selectedIndex: 0
-            });
             
-            // Content Font
-            column.staticTexts.add({staticLabel: "Content Font:"});
-            var contentFontDropdown = column.dropdowns.add({
+            // Page Title Headers Panel
+            var pageTitlePanel = column.borderPanels.add();
+            pageTitlePanel.staticTexts.add({staticLabel: "PAGE TITLE HEADERS"});
+            pageTitlePanel.staticTexts.add({staticLabel: "Font:"});
+            var pageTitleFontDropdown = pageTitlePanel.dropdowns.add({
                 stringList: fontArray,
                 selectedIndex: 0
             });
-            
-            // Content font color selection
-            column.staticTexts.add({staticLabel: "Content Font Color:"});
-            var contentFontColorDropdown = column.dropdowns.add({
+            pageTitlePanel.staticTexts.add({staticLabel: "Color:"});
+            var pageTitleColorDropdown = pageTitlePanel.dropdowns.add({
                 stringList: fontColors,
                 selectedIndex: 0
             });
+            pageTitlePanel.staticTexts.add({staticLabel: "Size (pt):"});
+            var pageTitleSizeField = pageTitlePanel.realEditboxes.add({editValue: 18});
             
-            // Month Calendar Font
-            column.staticTexts.add({staticLabel: "Month Calendar Font:"});
-            var calendarFontDropdown = column.dropdowns.add({
+            // Weekly Content Panel
+            var weeklyContentPanel = column.borderPanels.add();
+            weeklyContentPanel.staticTexts.add({staticLabel: "WEEKLY SPREAD CONTENT"});
+            weeklyContentPanel.staticTexts.add({staticLabel: "Font:"});
+            var weeklyContentFontDropdown = weeklyContentPanel.dropdowns.add({
                 stringList: fontArray,
-                selectedIndex: 0
+                selectedIndex: Math.min(1, fontArray.length - 1)
             });
-            
-            // Month Calendar font color selection
-            column.staticTexts.add({staticLabel: "Month Calendar Font Color:"});
-            var calendarFontColorDropdown = column.dropdowns.add({
+            weeklyContentPanel.staticTexts.add({staticLabel: "Color:"});
+            var weeklyContentColorDropdown = weeklyContentPanel.dropdowns.add({
                 stringList: fontColors,
                 selectedIndex: 0
             });
+            weeklyContentPanel.staticTexts.add({staticLabel: "Size (pt):"});
+            var weeklyContentSizeField = weeklyContentPanel.realEditboxes.add({editValue: 12});
             
-            // Spacer
-            column.staticTexts.add({staticLabel: " "});
-            column.staticTexts.add({staticLabel: "--- COLOR OPTIONS ---"});
+            // Monthly Calendar Panel
+            var monthlyCalendarPanel = column.borderPanels.add();
+            monthlyCalendarPanel.staticTexts.add({staticLabel: "MONTHLY CALENDAR DATES"});
+            monthlyCalendarPanel.staticTexts.add({staticLabel: "Font:"});
+            var monthlyCalendarFontDropdown = monthlyCalendarPanel.dropdowns.add({
+                stringList: fontArray,
+                selectedIndex: Math.min(1, fontArray.length - 1)
+            });
+            monthlyCalendarPanel.staticTexts.add({staticLabel: "Color:"});
+            var monthlyCalendarColorDropdown = monthlyCalendarPanel.dropdowns.add({
+                stringList: fontColors,
+                selectedIndex: 0
+            });
+            monthlyCalendarPanel.staticTexts.add({staticLabel: "Size (pt):"});
+            var monthlyCalendarSizeField = monthlyCalendarPanel.realEditboxes.add({editValue: 10});
             
-            // Header color CMYK values
-            column.staticTexts.add({staticLabel: "Header Color (CMYK values):"});
+            // Mini-Calendar Titles Panel
+            var miniCalendarTitlePanel = column.borderPanels.add();
+            miniCalendarTitlePanel.staticTexts.add({staticLabel: "MINI-CALENDAR TITLES"});
+            miniCalendarTitlePanel.staticTexts.add({staticLabel: "Font:"});
+            var miniCalendarTitleFontDropdown = miniCalendarTitlePanel.dropdowns.add({
+                stringList: fontArray,
+                selectedIndex: Math.min(1, fontArray.length - 1)
+            });
+            miniCalendarTitlePanel.staticTexts.add({staticLabel: "Color:"});
+            var miniCalendarTitleColorDropdown = miniCalendarTitlePanel.dropdowns.add({
+                stringList: fontColors,
+                selectedIndex: 0
+            });
+            miniCalendarTitlePanel.staticTexts.add({staticLabel: "Size (pt):"});
+            var miniCalendarTitleSizeField = miniCalendarTitlePanel.realEditboxes.add({editValue: 9});
             
-            // Create a row for CMYK values
-            var row1 = column.dialogRows.add();
-            row1.staticTexts.add({staticLabel: "Cyan %:"});
-            var cyanField = row1.realEditboxes.add({editValue: 20});
+            // Mini-Calendar Dates Panel
+            var miniCalendarDatePanel = column.borderPanels.add();
+            miniCalendarDatePanel.staticTexts.add({staticLabel: "MINI-CALENDAR DATES"});
+            miniCalendarDatePanel.staticTexts.add({staticLabel: "Font:"});
+            var miniCalendarDateFontDropdown = miniCalendarDatePanel.dropdowns.add({
+                stringList: fontArray,
+                selectedIndex: Math.min(1, fontArray.length - 1)
+            });
+            miniCalendarDatePanel.staticTexts.add({staticLabel: "Color:"});
+            var miniCalendarDateColorDropdown = miniCalendarDatePanel.dropdowns.add({
+                stringList: fontColors,
+                selectedIndex: 0
+            });
+            miniCalendarDatePanel.staticTexts.add({staticLabel: "Size (pt):"});
+            var miniCalendarDateSizeField = miniCalendarDatePanel.realEditboxes.add({editValue: 7});
             
-            var row2 = column.dialogRows.add();
-            row2.staticTexts.add({staticLabel: "Magenta %:"});
-            var magentaField = row2.realEditboxes.add({editValue: 40});
+            // =================================================================
+            // HEADER COLOR PANEL
+            // =================================================================
+            var colorPanel = column.borderPanels.add();
+            colorPanel.staticTexts.add({staticLabel: "HEADER COLOR (CMYK)"});
             
-            var row3 = column.dialogRows.add();
-            row3.staticTexts.add({staticLabel: "Yellow %:"});
-            var yellowField = row3.realEditboxes.add({editValue: 60});
+            colorPanel.staticTexts.add({staticLabel: "Cyan %:"});
+            var cyanField = colorPanel.realEditboxes.add({editValue: 20});
+            colorPanel.staticTexts.add({staticLabel: "Magenta %:"});
+            var magentaField = colorPanel.realEditboxes.add({editValue: 40});
+            colorPanel.staticTexts.add({staticLabel: "Yellow %:"});
+            var yellowField = colorPanel.realEditboxes.add({editValue: 60});
+            colorPanel.staticTexts.add({staticLabel: "Black %:"});
+            var blackField = colorPanel.realEditboxes.add({editValue: 0});
             
-            var row4 = column.dialogRows.add();
-            row4.staticTexts.add({staticLabel: "Black %:"});
-            var blackField = row4.realEditboxes.add({editValue: 0});
-            
-            // Add option to use existing color if available
+            var useExistingCheckbox, colorDropdown;
             if (docColors.length > 0) {
-                column.staticTexts.add({staticLabel: " "});
-                column.staticTexts.add({staticLabel: "--- OR USE EXISTING COLOR ---"});
-                
-                var row5 = column.dialogRows.add();
-                var useExistingCheckbox = row5.checkboxControls.add({
-                    staticLabel: "Use existing color instead:",
+                colorPanel.staticTexts.add({staticLabel: "OR USE EXISTING COLOR:"});
+                useExistingCheckbox = colorPanel.checkboxControls.add({
+                    staticLabel: "Use existing color instead",
                     checkedState: false
                 });
-                
-                var row6 = column.dialogRows.add();
-                row6.staticTexts.add({staticLabel: "Select color:"});
-                var colorDropdown = row6.dropdowns.add({
+                colorPanel.staticTexts.add({staticLabel: "Select color:"});
+                colorDropdown = colorPanel.dropdowns.add({
                     stringList: docColors,
                     selectedIndex: 0
                 });
             }
             
-            // Monthly spread options section
-            column.staticTexts.add({staticLabel: " "});
-            column.staticTexts.add({staticLabel: "--- MONTHLY SPREAD OPTIONS ---"});
-            
-            // Include monthly spreads option
-            var row7 = column.dialogRows.add();
-            var includeMonthlyCheckbox = row7.checkboxControls.add({
-                staticLabel: "Include monthly spreads:",
+            // =================================================================
+            // OPTIONS PANEL
+            // =================================================================
+            var optionsPanel = column.borderPanels.add();
+            optionsPanel.staticTexts.add({staticLabel: "OPTIONS"});
+            var includeMonthlyCheckbox = optionsPanel.checkboxControls.add({
+                staticLabel: "Include monthly spreads",
                 checkedState: true
             });
             
-            // Show the dialog
+            // Show dialog
             if (dialog.show()) {
-                // User clicked OK - gather the values
+                // Calculate start and end dates
+                var selectedStartMonth = startMonthDropdown.selectedIndex;
+                var selectedStartYear = parseInt(yearOptions[startYearDropdown.selectedIndex]);
+                var selectedStartDay = Math.max(1, Math.min(31, startDayField.editValue));
+                var selectedDuration = Math.max(1, Math.min(60, durationField.editValue));
+                
+                var startDate = new Date(selectedStartYear, selectedStartMonth, selectedStartDay);
+                if (startDate.getMonth() !== selectedStartMonth) {
+                    startDate = new Date(selectedStartYear, selectedStartMonth + 1, 0);
+                    alert("Invalid date corrected to: " + (startDate.getMonth() + 1) + "/" + startDate.getDate() + "/" + startDate.getFullYear());
+                }
+                
+                var endDate = new Date(startDate);
+                endDate.setMonth(endDate.getMonth() + selectedDuration);
+                
                 var prefs = {
-                    titleFont: fontArray[titleFontDropdown.selectedIndex],
-                    titleFontColor: fontColors[titleFontColorDropdown.selectedIndex],
-                    contentFont: fontArray[contentFontDropdown.selectedIndex],
-                    contentFontColor: fontColors[contentFontColorDropdown.selectedIndex],
-                    calendarFont: fontArray[calendarFontDropdown.selectedIndex],
-                    calendarFontColor: fontColors[calendarFontColorDropdown.selectedIndex],
+                    // NEW: Test mode and duration
+                    testMode: testModeCheckbox.checkedState,
+                    startDate: startDate,
+                    endDate: endDate,
+                    durationMonths: selectedDuration,
+                    
+                    // NEW: Granular font settings
+                    pageTitleFont: fontArray[pageTitleFontDropdown.selectedIndex],
+                    pageTitleColor: fontColors[pageTitleColorDropdown.selectedIndex],
+                    pageTitleSize: pageTitleSizeField.editValue,
+                    
+                    weeklyContentFont: fontArray[weeklyContentFontDropdown.selectedIndex],
+                    weeklyContentColor: fontColors[weeklyContentColorDropdown.selectedIndex],
+                    weeklyContentSize: weeklyContentSizeField.editValue,
+                    
+                    monthlyCalendarFont: fontArray[monthlyCalendarFontDropdown.selectedIndex],
+                    monthlyCalendarColor: fontColors[monthlyCalendarColorDropdown.selectedIndex],
+                    monthlyCalendarSize: monthlyCalendarSizeField.editValue,
+                    
+                    miniCalendarTitleFont: fontArray[miniCalendarTitleFontDropdown.selectedIndex],
+                    miniCalendarTitleColor: fontColors[miniCalendarTitleColorDropdown.selectedIndex],
+                    miniCalendarTitleSize: miniCalendarTitleSizeField.editValue,
+                    
+                    miniCalendarDateFont: fontArray[miniCalendarDateFontDropdown.selectedIndex],
+                    miniCalendarDateColor: fontColors[miniCalendarDateColorDropdown.selectedIndex],
+                    miniCalendarDateSize: miniCalendarDateSizeField.editValue,
+                    
+                    // EXISTING: Header color settings (preserved)
                     headerColorValues: [
                         cyanField.editValue,
                         magentaField.editValue,
                         yellowField.editValue,
                         blackField.editValue
                     ],
-                    includeMonthly: includeMonthlyCheckbox.checkedState
+                    headerColorName: "HeaderColor",
+                    useExistingColors: useExistingCheckbox ? useExistingCheckbox.checkedState : false,
+                    selectedExistingColor: (colorDropdown && useExistingCheckbox && useExistingCheckbox.checkedState) 
+                        ? docColors[colorDropdown.selectedIndex] : null,
+                    
+                    // EXISTING: Options (preserved)
+                    includeMonthly: includeMonthlyCheckbox.checkedState,
+                    
+                    // LEGACY: Map new settings to old names for backward compatibility
+                    titleFont: fontArray[pageTitleFontDropdown.selectedIndex],
+                    titleFontColor: fontColors[pageTitleColorDropdown.selectedIndex],
+                    contentFont: fontArray[weeklyContentFontDropdown.selectedIndex],
+                    contentFontColor: fontColors[weeklyContentColorDropdown.selectedIndex],
+                    calendarFont: fontArray[monthlyCalendarFontDropdown.selectedIndex],
+                    calendarFontColor: fontColors[monthlyCalendarColorDropdown.selectedIndex]
                 };
-                
-                // Handle existing color selection if it was available
-                if (docColors.length > 0) {
-                    prefs.useExistingColors = useExistingCheckbox.checkedState;
-                    if (prefs.useExistingColors) {
-                        prefs.headerColorName = docColors[colorDropdown.selectedIndex];
-                    } else {
-                        prefs.headerColorName = "HeaderColor";
-                    }
-                } else {
-                    prefs.useExistingColors = false;
-                    prefs.headerColorName = "HeaderColor";
-                }
                 
                 dialog.destroy();
                 
@@ -173,15 +296,14 @@ var Preferences = (function() {
                 
                 return prefs;
             } else {
-                // User canceled
                 dialog.destroy();
                 return null;
             }
         } catch (e) {
-            if (dialog) {
+            if (dialog && dialog.isValid) {
                 dialog.destroy();
             }
-            throw new Error("Error creating preferences dialog: " + e.message + "\nLine: " + e.line);
+            throw new Error("Error creating enhanced preferences dialog: " + e.message);
         }
     }
     
@@ -192,14 +314,10 @@ var Preferences = (function() {
      */
     function storePreferences(doc, prefs) {
         try {
-            // Convert preferences to JSON string
             var prefsJson = JSON.stringify(prefs);
-            
-            // Store in document label
-            doc.insertLabel("PlannerPreferences", prefsJson);
+            doc.insertLabel("EnhancedPlannerPreferences", prefsJson);
         } catch (e) {
             $.writeln("Warning: Could not store preferences: " + e.message);
-            // Continue without storing - not a critical error
         }
     }
     
@@ -210,12 +328,8 @@ var Preferences = (function() {
      */
     function retrievePreferences(doc) {
         try {
-            // Check if preferences label exists
-            if (doc.extractLabel("PlannerPreferences") !== "") {
-                // Get stored preferences JSON
-                var prefsJson = doc.extractLabel("PlannerPreferences");
-                
-                // Parse and return
+            if (doc.extractLabel("EnhancedPlannerPreferences") !== "") {
+                var prefsJson = doc.extractLabel("EnhancedPlannerPreferences");
                 return JSON.parse(prefsJson);
             }
             return null;
@@ -226,43 +340,74 @@ var Preferences = (function() {
     }
     
     /**
-     * Gets default preferences
-     * @returns {Object} Default preferences
+     * Gets enhanced default preferences
+     * @returns {Object} Default preferences with all new settings
      */
     function getDefaultPreferences() {
+        var currentDate = new Date();
+        var endDate = new Date(currentDate);
+        endDate.setFullYear(endDate.getFullYear() + 1);
+        
         return {
+            // NEW: Test mode and duration
+            testMode: false,
+            startDate: currentDate,
+            endDate: endDate,
+            durationMonths: 12,
+            
+            // NEW: Granular font settings
+            pageTitleFont: "Minion Pro",
+            pageTitleColor: "Black",
+            pageTitleSize: 18,
+            
+            weeklyContentFont: "Myriad Pro",
+            weeklyContentColor: "Black", 
+            weeklyContentSize: 12,
+            
+            monthlyCalendarFont: "Myriad Pro",
+            monthlyCalendarColor: "Black",
+            monthlyCalendarSize: 10,
+            
+            miniCalendarTitleFont: "Myriad Pro",
+            miniCalendarTitleColor: "Black",
+            miniCalendarTitleSize: 9,
+            
+            miniCalendarDateFont: "Myriad Pro",
+            miniCalendarDateColor: "Black",
+            miniCalendarDateSize: 7,
+            
+            // EXISTING: Header color and options
+            headerColorValues: [20, 40, 60, 0],
+            headerColorName: "HeaderColor",
+            useExistingColors: false,
+            includeMonthly: true,
+            
+            // LEGACY: Backward compatibility mappings
             titleFont: "Minion Pro",
             titleFontColor: "Black",
             contentFont: "Myriad Pro",
             contentFontColor: "Black",
             calendarFont: "Myriad Pro",
-            calendarFontColor: "Black",
-            headerColorValues: [20, 40, 60, 0],
-            headerColorName: "HeaderColor",
-            useExistingColors: false,
-            includeMonthly: true
+            calendarFontColor: "Black"
         };
     }
     
     /**
-     * Gets preferences, either from user dialog, stored prefs, or defaults
+     * Gets preferences with enhanced options
      * @param {Document} doc - The InDesign document
      * @param {Boolean} forceDialog - If true, always show dialog regardless of stored prefs
-     * @returns {Object} Preferences object
+     * @returns {Object} Enhanced preferences object
      */
     function getPreferences(doc, forceDialog) {
-        // First try to get stored preferences
         var prefs = null;
         
         if (!forceDialog) {
             prefs = retrievePreferences(doc);
         }
         
-        // If no stored preferences or dialog is forced, show dialog
         if (!prefs || forceDialog) {
             prefs = getUserPreferences(doc);
             
-            // If user canceled dialog, use defaults
             if (!prefs) {
                 prefs = getDefaultPreferences();
             }
