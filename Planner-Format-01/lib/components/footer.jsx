@@ -1,9 +1,18 @@
+// Planner-Format-01/lib/components/footer.jsx
+
 /*******************************************************************************
- * Footer Component
+ * Enhanced Footer Component
  * 
  * Creates footers for the weekly spreads, including:
  * - Week number display
+ * - Month and year display for monthly spreads
  * - Integration with QR codes
+ * 
+ * ENHANCED IN V03:
+ * - Uses "Page Title Headers" font settings but reduced by 2 points
+ * - Maintains visual hierarchy with headers while ensuring consistency
+ * - Enhanced error handling and formatting options
+ * - Supports user-defined font sizes with automatic reduction
  *******************************************************************************/
 
 var Footer = (function() {
@@ -13,7 +22,7 @@ var Footer = (function() {
      * @param {Page} rightPage - Right page of the spread
      * @param {Number} weekNumber - Current week number
      * @param {Object} pageMetrics - Page size and margin information
-     * @param {Object} userPrefs - User preferences for fonts and colors
+     * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      * @param {Date} startDate - Start date of the week
      * @param {Date} endDate - End date of the week
      */
@@ -24,7 +33,11 @@ var Footer = (function() {
                 throw new Error("Invalid arguments: One or more required parameters are undefined.");
             }
     
+            // NEW IN V03: Get footer font settings (header font but 2 points smaller)
+            var footerFontSettings = getFooterFontSettings(userPrefs);
+            
             var footerY = pageMetrics.height - pageMetrics.margins.bottom;
+            var weekText = "Week " + weekNumber;
     
             // Add week number to left page footer - LEFT JUSTIFIED
             var leftFooter = leftPage.textFrames.add({
@@ -34,13 +47,22 @@ var Footer = (function() {
                     footerY + 20, // Shorter height (was +25)
                     leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: "Week " + weekNumber
+                contents: weekText
             });
     
-            // Apply text formatting
-            Utils.applyTextFormatting(leftFooter.texts.item(0), userPrefs.contentFont, userPrefs.contentFontColor);
-            leftFooter.texts.item(0).justification = Justification.LEFT_ALIGN;
-            Utils.setupTextFrame(leftFooter);
+            // NEW IN V03: Apply enhanced footer font formatting
+            try {
+                Utils.applyTextFormatting(leftFooter.texts.item(0), footerFontSettings.font, footerFontSettings.color);
+                leftFooter.texts.item(0).pointSize = footerFontSettings.size;
+                leftFooter.texts.item(0).justification = Justification.LEFT_ALIGN;
+                Utils.setupTextFrame(leftFooter);
+                
+                $.writeln("[Footer] Left week footer created: '" + weekText + "' with font: " + 
+                         footerFontSettings.font + ", size: " + footerFontSettings.size + "pt");
+                
+            } catch (leftFormatError) {
+                throw new Error("Error formatting left week footer: " + leftFormatError.message);
+            }
     
             // Add week number to right page footer - RIGHT JUSTIFIED
             var rightFooter = rightPage.textFrames.add({
@@ -50,13 +72,22 @@ var Footer = (function() {
                     footerY + 20, // Shorter height (was +25)
                     rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: "Week " + weekNumber
+                contents: weekText
             });
     
-            // Apply text formatting
-            Utils.applyTextFormatting(rightFooter.texts.item(0), userPrefs.contentFont, userPrefs.contentFontColor);
-            rightFooter.texts.item(0).justification = Justification.RIGHT_ALIGN;
-            Utils.setupTextFrame(rightFooter);
+            // NEW IN V03: Apply enhanced footer font formatting
+            try {
+                Utils.applyTextFormatting(rightFooter.texts.item(0), footerFontSettings.font, footerFontSettings.color);
+                rightFooter.texts.item(0).pointSize = footerFontSettings.size;
+                rightFooter.texts.item(0).justification = Justification.RIGHT_ALIGN;
+                Utils.setupTextFrame(rightFooter);
+                
+                $.writeln("[Footer] Right week footer created: '" + weekText + "' with font: " + 
+                         footerFontSettings.font + ", size: " + footerFontSettings.size + "pt");
+                
+            } catch (rightFormatError) {
+                throw new Error("Error formatting right week footer: " + rightFormatError.message);
+            }
     
             // Don't try to add QR codes here - let WeeklyView.jsx handle it
         } catch (e) {
@@ -70,16 +101,20 @@ var Footer = (function() {
      * @param {Page} rightPage - Right page of the spread
      * @param {Date} monthDate - First day of the month
      * @param {Object} pageMetrics - Page size and margin information
-     * @param {Object} userPrefs - User preferences for fonts and colors
+     * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
     function createMonthFooter(leftPage, rightPage, monthDate, pageMetrics, userPrefs) {
         try {
+            // NEW IN V03: Get footer font settings (header font but 2 points smaller)
+            var footerFontSettings = getFooterFontSettings(userPrefs);
+            
             var footerY = pageMetrics.height - pageMetrics.margins.bottom;
             var monthNames = ["January", "February", "March", "April", "May", "June", 
                               "July", "August", "September", "October", "November", "December"];
             var monthName = monthNames[monthDate.getMonth()];
+            var footerText = monthName + " " + monthDate.getFullYear();
             
-            // Add month name to left page footer
+            // Add month name to left page footer - LEFT JUSTIFIED
             var leftFooter = leftPage.textFrames.add({
                 geometricBounds: [
                     footerY + 5,  // Adjust position to be below content area
@@ -87,15 +122,21 @@ var Footer = (function() {
                     footerY + 25,
                     leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: monthName + " " + monthDate.getFullYear()
+                contents: footerText
             });
 
-            // Apply text formatting
-            Utils.applyTextFormatting(leftFooter.texts.item(0), userPrefs.contentFont, userPrefs.contentFontColor);
-            leftFooter.texts.item(0).justification = Justification.LEFT_ALIGN;
-            Utils.setupTextFrame(leftFooter);
+            // NEW IN V03: Apply enhanced footer font formatting
+            try {
+                Utils.applyTextFormatting(leftFooter.texts.item(0), footerFontSettings.font, footerFontSettings.color);
+                leftFooter.texts.item(0).pointSize = footerFontSettings.size;
+                leftFooter.texts.item(0).justification = Justification.LEFT_ALIGN;
+                Utils.setupTextFrame(leftFooter);
+                
+            } catch (leftFormatError) {
+                throw new Error("Error formatting left month footer: " + leftFormatError.message);
+            }
 
-            // Add month name to right page footer
+            // Add month name to right page footer - RIGHT JUSTIFIED
             var rightFooter = rightPage.textFrames.add({
                 geometricBounds: [
                     footerY + 5,  // Adjust position to be below content area
@@ -103,22 +144,113 @@ var Footer = (function() {
                     footerY + 25,
                     rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
                 ],
-                contents: monthName + " " + monthDate.getFullYear()
+                contents: footerText
             });
 
-            // Apply text formatting
-            Utils.applyTextFormatting(rightFooter.texts.item(0), userPrefs.contentFont, userPrefs.contentFontColor);
-            rightFooter.texts.item(0).justification = Justification.RIGHT_ALIGN;
-            Utils.setupTextFrame(rightFooter);
+            // NEW IN V03: Apply enhanced footer font formatting
+            try {
+                Utils.applyTextFormatting(rightFooter.texts.item(0), footerFontSettings.font, footerFontSettings.color);
+                rightFooter.texts.item(0).pointSize = footerFontSettings.size;
+                rightFooter.texts.item(0).justification = Justification.RIGHT_ALIGN;
+                Utils.setupTextFrame(rightFooter);
+                
+            } catch (rightFormatError) {
+                throw new Error("Error formatting right month footer: " + rightFormatError.message);
+            }
+            
+            $.writeln("[Footer] Month footers created for " + footerText + 
+                     " with font: " + footerFontSettings.font + ", size: " + footerFontSettings.size + "pt");
             
         } catch (e) {
             throw new Error("Error creating month footer: " + e.message);
         }
     }
     
+    /**
+     * NEW IN V03: Get effective font settings for footers (header font but 2 points smaller)
+     * @param {Object} userPrefs - Enhanced user preferences
+     * @returns {Object} Object with font, color, and size properties
+     */
+    function getFooterFontSettings(userPrefs) {
+        // Use the same font and color as page title headers
+        var headerFont = userPrefs.pageTitleFont || userPrefs.titleFont || "Minion Pro";
+        var headerColor = userPrefs.pageTitleColor || userPrefs.titleFontColor || "Black";
+        var headerSize = userPrefs.pageTitleSize || 18; // Default page title size
+        
+        // Reduce size by 2 points for footer hierarchy
+        var footerSize = Math.max(6, headerSize - 2); // Minimum 6pt, but typically headerSize - 2
+        
+        return {
+            font: headerFont,
+            color: headerColor,
+            size: footerSize
+        };
+    }
+    
+    /**
+     * NEW IN V03: Creates an enhanced footer with additional formatting options
+     * @param {Page} page - The page to add the footer to
+     * @param {String} content - The text content for the footer
+     * @param {Array} bounds - Geometric bounds for the footer [y1, x1, y2, x2]
+     * @param {Object} userPrefs - Enhanced user preferences
+     * @param {Object} options - Additional formatting options
+     * @returns {TextFrame} The created footer text frame
+     */
+    function createEnhancedFooter(page, content, bounds, userPrefs, options) {
+        options = options || {};
+        
+        try {
+            var footerText = page.textFrames.add({
+                geometricBounds: bounds,
+                contents: content
+            });
+            
+            // Get effective font settings
+            var fontSettings = getFooterFontSettings(userPrefs);
+            
+            // Allow options to override the calculated settings
+            if (options.fontSize) {
+                fontSettings.size = options.fontSize;
+            }
+            if (options.fontColor) {
+                fontSettings.color = options.fontColor;
+            }
+            if (options.fontFamily) {
+                fontSettings.font = options.fontFamily;
+            }
+            
+            // Apply formatting
+            Utils.applyTextFormatting(footerText.texts.item(0), fontSettings.font, fontSettings.color);
+            footerText.texts.item(0).pointSize = fontSettings.size;
+            footerText.texts.item(0).justification = options.justification || Justification.LEFT_ALIGN;
+            
+            Utils.setupTextFrame(footerText);
+            
+            return footerText;
+            
+        } catch (e) {
+            throw new Error("Error creating enhanced footer: " + e.message);
+        }
+    }
+    
+    /**
+     * NEW IN V03: Helper function to calculate footer size based on header size
+     * @param {Object} userPrefs - Enhanced user preferences
+     * @param {Number} sizeReduction - Points to reduce from header size (default: 2)
+     * @returns {Number} The calculated footer font size
+     */
+    function calculateFooterSize(userPrefs, sizeReduction) {
+        sizeReduction = sizeReduction || 2;
+        var headerSize = userPrefs.pageTitleSize || 18;
+        return Math.max(6, headerSize - sizeReduction); // Minimum 6pt font size
+    }
+    
     // Return public interface
     return {
         createWeekFooter: createWeekFooter,
-        createMonthFooter: createMonthFooter
+        createMonthFooter: createMonthFooter,
+        createEnhancedFooter: createEnhancedFooter,
+        getFooterFontSettings: getFooterFontSettings,
+        calculateFooterSize: calculateFooterSize
     };
 })();
