@@ -23,7 +23,7 @@ var Header = (function() {
      * @param {Object} pageMetrics - Page size and margin information
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
-    function createWeekHeader(page, startDate, endDate, pageMetrics, userPrefs) {
+    function createWeekHeader(page, startDate, endDate, pageMetrics, userPrefs, justification) {
         try {
             var headerText = page.textFrames.add({
                 geometricBounds: [
@@ -49,7 +49,7 @@ var Header = (function() {
                 headerText.texts.item(0).pointSize = size;
                 
                 // Apply center alignment
-                headerText.texts.item(0).justification = Justification.CENTER_ALIGN;
+                headerText.texts.item(0).justification = justification || Justification.CENTER_ALIGN;
                 
                 // Try to apply bold formatting if available, otherwise skip it
                 try {
@@ -111,7 +111,7 @@ var Header = (function() {
             try {
                 Utils.applyTextFormatting(leftMonthText.texts.item(0), font, color);
                 leftMonthText.texts.item(0).pointSize = size;
-                leftMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+                leftMonthText.texts.item(0).justification = Justification.LEFT_ALIGN;
                 
                 // Try to apply bold formatting if available
                 try {
@@ -141,7 +141,7 @@ var Header = (function() {
             try {
                 Utils.applyTextFormatting(rightMonthText.texts.item(0), font, color);
                 rightMonthText.texts.item(0).pointSize = size;
-                rightMonthText.texts.item(0).justification = Justification.CENTER_ALIGN;
+                rightMonthText.texts.item(0).justification = Justification.RIGHT_ALIGN;
                 
                 // Try to apply bold formatting if available
                 try {

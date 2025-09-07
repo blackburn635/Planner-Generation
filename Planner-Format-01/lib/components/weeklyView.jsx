@@ -40,11 +40,16 @@ var WeeklyView = (function() {
             $.writeln("Warning: Expected right page at index " + rightPageIndex + " but got " + rightPage.side);
         }
 
-        // Create the week's date range header (only on left page per spread)
+        // Create week headers on both pages with different alignments
         var endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 6);
-        Header.createWeekHeader(leftPage, startDate, endDate, pageMetrics, userPrefs);
-        
+
+        // Left page header - left justified
+        Header.createWeekHeader(leftPage, startDate, endDate, pageMetrics, userPrefs, Justification.LEFT_ALIGN);
+
+        // Right page header - right justified  
+        Header.createWeekHeader(rightPage, startDate, endDate, pageMetrics, userPrefs, Justification.RIGHT_ALIGN);
+                
         // Calculate section heights for left page (4 equal sections)
         var numSections = 4;
         var sectionHeight = Layout.calculateSectionHeight(pageMetrics, numSections);
