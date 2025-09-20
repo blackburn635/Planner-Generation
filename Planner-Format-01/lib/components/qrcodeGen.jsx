@@ -1,10 +1,11 @@
 /*******************************************************************************
- * QR Code Generation Component
+ * QR Code Generation Component - With Binding-Aware Margins
  * 
  * Handles the creation and placement of QR codes throughout the planner.
  * - Generates QR codes with date information
  * - Places QR codes on planner pages
  * - Formats and styles QR code display
+ * - NEW: Uses binding-aware margins when pageMetrics contains effective margins
  * 
  * Depends on the external qrcode.jsx library for the actual QR code generation.
  *******************************************************************************/
@@ -16,7 +17,7 @@ var QRCodeGen = (function() {
      * @param {Date} startDate - First day displayed on the page
      * @param {Date} endDate - Last day displayed on the page (unused in new format)
      * @param {String} pageType - Type of page (e.g., "LEFT_WEEKDAY", "RIGHT_WEEKEND")
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - User preferences for fonts and colors
      * @returns {PageItem} The placed QR code item
      */
@@ -43,10 +44,10 @@ var QRCodeGen = (function() {
             
             if (!qrFile) return null;
             
-            // Better QR code positioning
+            // Better QR code positioning using binding-aware margins
             var qrSize = 30; // Smaller size (was 40)
             var boundaryPadding = 3; // Smaller padding (was 5)
-            var footerY = pageMetrics.height - pageMetrics.margins.bottom;
+            var footerY = pageMetrics.height - pageMetrics.margins.bottom; // Uses binding-aware bottom margin
             
             // Position the QR code relative to the footer text
             // For left pages, position toward left side
@@ -55,15 +56,14 @@ var QRCodeGen = (function() {
             
             qrY = footerY - 0; // Position below the footer text (was +5)
             
-            
-
+            // Center the QR code horizontally within the usable area using binding-aware margins
             if (pageType.indexOf("LEFT") >= 0) {
-                qrX = page.bounds[1] + pageMetrics.margins.left + (pageMetrics.usable.width * 0.5) - (qrSize / 2);
+                qrX = page.bounds[1] + pageMetrics.margins.left + (pageMetrics.usable.width * 0.5) - (qrSize / 2); // Uses binding-aware margins
             } else {
-                qrX = page.bounds[1] + pageMetrics.margins.left + (pageMetrics.usable.width * 0.5) - (qrSize / 2);
+                qrX = page.bounds[1] + pageMetrics.margins.left + (pageMetrics.usable.width * 0.5) - (qrSize / 2); // Uses binding-aware margins
             }
             
-            // Create boundary box with white/paper fill
+            // Create boundary box with white/paper fill using binding-aware positioning
             var boundaryBox = page.rectangles.add({
                 geometricBounds: [
                     qrY - boundaryPadding,
@@ -200,17 +200,28 @@ var QRCodeGen = (function() {
         var endDate = new Date();
         endDate.setDate(endDate.getDate() + 4);
         
-        // Get page metrics for positioning
-        var pageMetrics = {
-            width: doc.documentPreferences.pageWidth,
-            height: doc.documentPreferences.pageHeight,
-            margins: {
-                left: doc.marginPreferences.left,
-                right: doc.marginPreferences.right,
-                top: doc.marginPreferences.top,
-                bottom: doc.marginPreferences.bottom
-            }
-        };
+        // Get page metrics for positioning (uses binding-aware margins if available)
+        var pageMetrics;
+        if (Layout && Layout.calculatePageMetricsForPage) {
+            // Use binding-aware calculation if available
+            pageMetrics = Layout.calculatePageMetricsForPage(doc, page);
+        } else {
+            // Fallback to legacy calculation
+            pageMetrics = {
+                width: doc.documentPreferences.pageWidth,
+                height: doc.documentPreferences.pageHeight,
+                margins: {
+                    left: doc.marginPreferences.left,
+                    right: doc.marginPreferences.right,
+                    top: doc.marginPreferences.top,
+                    bottom: doc.marginPreferences.bottom
+                },
+                usable: {
+                    width: doc.documentPreferences.pageWidth - (doc.marginPreferences.left + doc.marginPreferences.right),
+                    height: doc.documentPreferences.pageHeight - (doc.marginPreferences.top + doc.marginPreferences.bottom)
+                }
+            };
+        }
         
         // Generate test QR code
         createQRCode(page, startDate, endDate, "TEST", pageMetrics);
