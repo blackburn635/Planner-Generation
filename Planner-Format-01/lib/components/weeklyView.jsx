@@ -1,10 +1,11 @@
 /*******************************************************************************
- * Weekly View Component
+ * Weekly View Component - Enhanced with Binding-Aware Margins
  * 
  * Handles the creation of weekly spreads throughout the planner.
  * - Creates two-page weekly spreads with day sections
  * - Coordinates the layout of different components on weekly pages
  * - Manages week numbers and date calculations
+ * - NEW: Uses binding-aware margins for proper coil binding layout
  *******************************************************************************/
 
 var WeeklyView = (function() {
@@ -14,7 +15,7 @@ var WeeklyView = (function() {
      * @param {Date} startDate - Monday of the week
      * @param {Number} weekNumber - Current week number
      * @param {Number} startPageIndex - Index of the first available page
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (legacy - will be recalculated per page)
      * @param {Object} userPrefs - User preferences for fonts and colors
      * @returns {Number} The next available page index
      */
@@ -40,19 +41,23 @@ var WeeklyView = (function() {
             $.writeln("Warning: Expected right page at index " + rightPageIndex + " but got " + rightPage.side);
         }
 
+        // NEW: Calculate page-specific metrics for binding-aware margins
+        var leftPageMetrics = Layout.calculatePageMetricsForPage(doc, leftPage);
+        var rightPageMetrics = Layout.calculatePageMetricsForPage(doc, rightPage);
+
         // Create week headers on both pages with different alignments
         var endDate = new Date(startDate);
         endDate.setDate(endDate.getDate() + 6);
 
-        // Left page header - left justified
-        Header.createWeekHeader(leftPage, startDate, endDate, pageMetrics, userPrefs, Justification.LEFT_ALIGN);
+        // Left page header - left justified (using left page metrics)
+        Header.createWeekHeader(leftPage, startDate, endDate, leftPageMetrics, userPrefs, Justification.LEFT_ALIGN);
 
-        // Right page header - right justified  
-        Header.createWeekHeader(rightPage, startDate, endDate, pageMetrics, userPrefs, Justification.RIGHT_ALIGN);
+        // Right page header - right justified (using right page metrics)
+        Header.createWeekHeader(rightPage, startDate, endDate, rightPageMetrics, userPrefs, Justification.RIGHT_ALIGN);
                 
         // Calculate section heights for left page (4 equal sections)
         var numSections = 4;
-        var sectionHeight = Layout.calculateSectionHeight(pageMetrics, numSections);
+        var sectionHeight = Layout.calculateSectionHeight(leftPageMetrics, numSections);
         
         // Create Monday-Thursday sections on left page
         var currentDate = new Date(startDate);
@@ -63,7 +68,7 @@ var WeeklyView = (function() {
         leftPageEndDate.setDate(leftPageEndDate.getDate() + 3); // End date is Thursday
         
         for (var i = 0; i < 4; i++) {
-            DaySection.createDaySection(leftPage, currentDate, i, sectionHeight, pageMetrics, userPrefs);
+            DaySection.createDaySection(leftPage, currentDate, i, sectionHeight, leftPageMetrics, userPrefs);
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
@@ -76,9 +81,9 @@ var WeeklyView = (function() {
         var rightPageEndDate = new Date(currentDate);
         rightPageEndDate.setDate(rightPageEndDate.getDate() + 2); // End date is Sunday
         
-        // Create Friday-Sunday sections (3 sections)
+        // Create Friday-Sunday sections (3 sections) using right page metrics
         for (var i = 0; i < 3; i++) {
-            DaySection.createDaySection(rightPage, currentDate, i, daySection, pageMetrics, userPrefs);
+            DaySection.createDaySection(rightPage, currentDate, i, daySection, rightPageMetrics, userPrefs);
             currentDate.setDate(currentDate.getDate() + 1);
         }
 
@@ -86,16 +91,16 @@ var WeeklyView = (function() {
         var sundayDate = new Date(startDate);
         sundayDate.setDate(sundayDate.getDate() + 6); // Sunday is 6 days after Monday
         
-        // Add monthly overview section in the remaining space
-        MonthlyView.createMonthlySection(rightPage, daySection, pageMetrics, userPrefs, sundayDate, weekNumber);
+        // Add monthly overview section in the remaining space (using right page metrics)
+        MonthlyView.createMonthlySection(rightPage, daySection, rightPageMetrics, userPrefs, sundayDate, weekNumber);
 
-        // Add week number to footer of both pages
-        Footer.createWeekFooter(leftPage, rightPage, weekNumber, pageMetrics, userPrefs, startDate, endDate);
+        // Add week number to footer of both pages (using respective page metrics)
+        Footer.createWeekFooter(leftPage, rightPage, weekNumber, leftPageMetrics, rightPageMetrics, userPrefs, startDate, endDate);
         
         try {
-            // Add QR codes to both pages
-            QRCodeGen.createQRCode(leftPage, leftPageStartDate, leftPageEndDate, "LEFT_WEEKDAY", pageMetrics, userPrefs);
-            QRCodeGen.createQRCode(rightPage, rightPageStartDate, rightPageEndDate, "RIGHT_WEEKEND", pageMetrics, userPrefs);
+            // Add QR codes to both pages (using respective page metrics)
+            QRCodeGen.createQRCode(leftPage, leftPageStartDate, leftPageEndDate, "LEFT_WEEKDAY", leftPageMetrics, userPrefs);
+            QRCodeGen.createQRCode(rightPage, rightPageStartDate, rightPageEndDate, "RIGHT_WEEKEND", rightPageMetrics, userPrefs);
         } catch (e) {
             $.writeln("Warning: QR code generation failed: " + e.message);
             // Continue execution even if QR code generation fails

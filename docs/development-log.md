@@ -311,3 +311,107 @@ The InDesign Planner Generator started as a monolithic script and evolved into a
 - Style templates using font combinations
 - Export settings for font documentation
 
+
+---
+
+## Phase 6: Enhanced Preferences & Font System (December 2024)
+*Updated: September 20, 2025 at 14:01*
+
+**Objective**: Implement comprehensive font control and testing capabilities
+
+### v1.8 - Enhanced Preferences System
+- **Added**: Comprehensive preferences dialog with organized panels
+- **Features**:
+  - Test mode: Generate only 10 pages for font/color testing
+  - Flexible date ranges: Custom start/end dates with duration control
+  - Granular font control: 5 separate font categories with size control
+- **Font Categories Implemented**:
+  - Page Title Headers (main page titles)
+  - Weekly Spread Content (day sections, notes)
+  - Monthly Spread Calendar Dates (main calendar numbers)
+  - Mini-Calendar Titles (month names, day headers)
+  - Mini-Calendar Dates (date numbers in mini calendars)
+- **Technical**: Complete preferences.jsx rewrite with fallback chains
+
+### v1.9 - Component Integration
+- **Updated**: All 7 core components to use enhanced font system
+- **Components Updated**:
+  - mainLetter-A4.jsx: Test mode and flexible date range support
+  - header.jsx: Page Title Headers font category
+  - daySection.jsx: Weekly Spread Content font category
+  - calendarGrid.jsx: Both Monthly and Mini-Calendar font categories
+  - footer.jsx: Page Title Headers font (size - 2pt) for hierarchy
+  - monthlyView.jsx: Mixed font categories for different elements
+  - monthSpread.jsx: All font categories used appropriately
+- **Features**:
+  - Automatic font size hierarchies (footers = headers - 2pt)
+  - Font-aware spacing (notes lines based on content font size)
+  - Enhanced error handling with detailed logging
+  - Backward compatibility through comprehensive fallbacks
+
+### Technical Achievements
+
+#### Enhanced User Experience
+1. **Test Mode**: 10-page preview for rapid font/color iteration
+2. **Flexible Planning**: Custom date ranges from 1-60 months
+3. **Typography Control**: Complete control over 5 font categories
+4. **Visual Hierarchy**: Automatic size relationships (header/footer)
+
+#### Architecture Improvements
+1. **Modular Font System**: Clean separation of font categories
+2. **Fallback Chains**: Backward compatibility with legacy settings
+3. **Error Resilience**: Non-fatal error handling throughout
+4. **Performance**: Test mode for faster iteration
+
+#### Code Quality Enhancements
+1. **Comprehensive Logging**: Detailed font application tracking
+2. **Modular Structure**: Separated helper functions for font settings
+3. **Error Isolation**: Component-level error handling
+4. **Documentation**: Enhanced comments and function documentation
+
+### Current State (December 2024)
+
+#### Completed Features:
+- ✅ Enhanced preferences with 5 granular font categories
+- ✅ Test mode (10 pages) for rapid testing
+- ✅ Flexible date ranges with custom duration
+- ✅ All components updated with enhanced font support
+- ✅ Automatic font hierarchy (footer = header - 2pt)
+- ✅ Font-aware layout spacing
+- ✅ Comprehensive error handling and logging
+- ✅ Backward compatibility maintained
+
+#### In Progress:
+- 🔄 Week headers on both pages (deferred to next session)
+
+#### Known Issues:
+- None identified with enhanced font system
+- All existing functionality preserved
+
+### Lessons Learned
+
+#### Technical Insights:
+1. **Font Fallback Chains**: Essential for backward compatibility
+2. **Modular Font Functions**: Cleaner code and easier maintenance
+3. **Test Mode Value**: Dramatically speeds up design iteration
+4. **Error Handling**: Non-fatal errors keep system working
+5. **Logging Importance**: Critical for debugging font issues
+
+#### Development Process:
+1. **Comprehensive Planning**: Font category mapping crucial upfront
+2. **Component-by-Component**: Safer than massive refactoring
+3. **Fallback Strategy**: Legacy support prevents breaking changes
+4. **User-Centric Design**: Test mode addresses real user needs
+
+### Future Considerations
+
+#### Immediate Next Steps:
+- Week headers on both pages
+- User testing of enhanced preferences
+- Performance testing with complex font combinations
+
+#### Long-term Enhancements:
+- Font preview in preferences dialog
+- Style templates using font combinations
+- Export settings for font documentation
+

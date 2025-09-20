@@ -1,7 +1,7 @@
 // Planner-Format-01/mainLetter-A4.jsx
 
 /*******************************************************************************
- * InDesign Planner Generation Script - Enhanced Main Module v03
+ * InDesign Planner Generation Script - Enhanced Main Module v03 with Binding-Aware Margins
  * 
  * This is the main entry point for the enhanced planner generation script. 
  * It orchestrates the overall process and handles both weekly and monthly spreads.
@@ -11,6 +11,7 @@
  * - Flexible date range: User-defined start and end dates with custom duration
  * - Granular font control: 5 separate font categories with size and color control
  * - Enhanced preferences system with organized panels
+ * - NEW: Binding-aware margins for coil binding support
  * 
  * Features:
  * - Weekly spreads with day sections and mini month views
@@ -18,6 +19,7 @@
  * - QR codes on each page containing date information
  * - Customizable styles, colors, and layouts
  * - Test mode for preview and font/color testing
+ * - Automatic binding-aware margin calculations for coil binding
  *******************************************************************************/
 
 // @targetengine "session"
@@ -62,7 +64,7 @@ function main() {
     
     var myDocument = app.activeDocument;
     
-    // Check for facing pages - critical for proper spread layout
+    // Check for facing pages - critical for proper spread layout and binding-aware margins
     if (!myDocument.documentPreferences.facingPages) {
         throw new Error("This script requires a document with facing pages enabled. Please enable facing pages in Document Setup and try again.");
     }
@@ -80,8 +82,12 @@ function main() {
         return;
     }
     
-    // Calculate page metrics from the document
+    // Calculate page metrics from the document (legacy format for backward compatibility)
     var pageMetrics = Layout.calculatePageMetrics(myDocument);
+    
+    // Check for binding-aware margin support and log the information
+    var bindingInfo = checkBindingSupport(myDocument);
+    $.writeln("[Main] " + bindingInfo.message);
     
     // Set up colors from user preferences if needed
     if (!userPrefs.useExistingColors) {
@@ -95,6 +101,54 @@ function main() {
     } else {
         // Full mode: Generate planner from start date to end date
         generateEnhancedPlanner(myDocument, userPrefs.startDate, userPrefs.endDate, pageMetrics, userPrefs);
+    }
+}
+
+/**
+ * NEW: Checks document setup for binding-aware margin support
+ * @param {Document} doc - The InDesign document
+ * @returns {Object} Information about binding support
+ */
+function checkBindingSupport(doc) {
+    try {
+        if (doc.documentPreferences.facingPages) {
+            // Try to access inside/outside margins
+            var insideMargin = doc.marginPreferences.inside;
+            var outsideMargin = doc.marginPreferences.outside;
+            
+            if (insideMargin !== outsideMargin) {
+                return {
+                    supported: true,
+                    message: "Binding-aware margins detected - Inside: " + insideMargin + "pt, Outside: " + outsideMargin + "pt. Using coil binding layout."
+                };
+            } else {
+                return {
+                    supported: false,
+                    message: "Equal inside/outside margins detected - Using standard layout. For coil binding, set different inside/outside margins."
+                };
+            }
+        } else {
+            return {
+                supported: false,
+                message: "Document does not have facing pages - Using standard layout."
+            };
+        }
+    } catch (e) {
+        // Fallback to left/right margin detection
+        var leftMargin = doc.marginPreferences.left;
+        var rightMargin = doc.marginPreferences.right;
+        
+        if (leftMargin !== rightMargin) {
+            return {
+                supported: true,
+                message: "Asymmetric margins detected - Left: " + leftMargin + "pt, Right: " + rightMargin + "pt. Using binding-aware layout."
+            };
+        } else {
+            return {
+                supported: false,
+                message: "Symmetric margins detected - Using standard layout."
+            };
+        }
     }
 }
 

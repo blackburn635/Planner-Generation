@@ -1,7 +1,7 @@
 // Planner-Format-01/lib/components/monthSpread.jsx
 
 /*******************************************************************************
- * Enhanced Month Spread Component
+ * Enhanced Month Spread Component - With Binding-Aware Margins
  * 
  * Creates a 2-page spread showing a full month calendar.
  * - Left page: Sunday-Wednesday (4 columns)
@@ -16,6 +16,7 @@
  * - Supports user-defined font sizes for all text elements
  * - Enhanced error handling and modular structure
  * - Maintains backward compatibility
+ * - NEW: Uses binding-aware margins when pageMetrics contains effective margins
  *******************************************************************************/
 
 var MonthSpread = (function() {
@@ -24,7 +25,7 @@ var MonthSpread = (function() {
      * @param {Document} doc - The InDesign document
      * @param {Date} monthDate - First day of the month
      * @param {Number} startPageIndex - Index of the first available page
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      * @returns {Number} The next available page index
      */
@@ -53,21 +54,39 @@ var MonthSpread = (function() {
             var leftPage = doc.pages.item(leftPageIndex);
             var rightPage = doc.pages.item(rightPageIndex);
             
+            // NEW: Calculate page-specific metrics for binding-aware margins
+            var leftPageMetrics = Layout.calculatePageMetricsForPage ? Layout.calculatePageMetricsForPage(doc, leftPage) : pageMetrics;
+            var rightPageMetrics = Layout.calculatePageMetricsForPage ? Layout.calculatePageMetricsForPage(doc, rightPage) : pageMetrics;
+            
             $.writeln("[MonthSpread] Creating month spread for " + 
                      (monthDate.getMonth() + 1) + "/" + monthDate.getFullYear() + 
                      " with enhanced font settings");
             
             // Create month header (year left-justified on left page, right-justified on right page)
-            Header.createMonthHeader(leftPage, rightPage, monthDate, pageMetrics, userPrefs);
+            // Check if Header.createMonthHeader supports separate page metrics
+            if (Header.createMonthHeader.length >= 6) {
+                // New signature that supports separate page metrics
+                Header.createMonthHeader(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs);
+            } else {
+                // Legacy signature - use original pageMetrics
+                Header.createMonthHeader(leftPage, rightPage, monthDate, pageMetrics, userPrefs);
+            }
             
             // Create calendar grid - days of week row
-            var headerHeight = createEnhancedDaysOfWeekRow(leftPage, rightPage, pageMetrics, userPrefs, weeklyContentFontSettings);
+            var headerHeight = createEnhancedDaysOfWeekRow(leftPage, rightPage, leftPageMetrics, rightPageMetrics, userPrefs, weeklyContentFontSettings);
             
             // Create the calendar grid cells for the month
-            createEnhancedMonthGrid(leftPage, rightPage, monthDate, pageMetrics, userPrefs, monthlyCalendarFontSettings, headerHeight);
+            createEnhancedMonthGrid(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs, monthlyCalendarFontSettings, headerHeight);
             
             // Create month footer
-            Footer.createMonthFooter(leftPage, rightPage, monthDate, pageMetrics, userPrefs);
+            // Check if Footer.createMonthFooter supports separate page metrics
+            if (Footer.createMonthFooter.length >= 6) {
+                // New signature that supports separate page metrics
+                Footer.createMonthFooter(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs);
+            } else {
+                // Legacy signature - use original pageMetrics
+                Footer.createMonthFooter(leftPage, rightPage, monthDate, pageMetrics, userPrefs);
+            }
             
             $.writeln("[MonthSpread] Month spread completed for " + 
                      (monthDate.getMonth() + 1) + "/" + monthDate.getFullYear());
@@ -84,28 +103,30 @@ var MonthSpread = (function() {
      * NEW IN V03: Creates enhanced days of week row on both pages
      * @param {Page} leftPage - Left page of the spread
      * @param {Page} rightPage - Right page of the spread
-     * @param {Object} pageMetrics - Page metrics information
+     * @param {Object} leftPageMetrics - Page metrics for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page metrics for right page (binding-aware)
      * @param {Object} userPrefs - Enhanced user preferences
      * @param {Object} miniTitleFontSettings - Font settings for day headers
      * @returns {Number} Height of the header row
      */
-    function createEnhancedDaysOfWeekRow(leftPage, rightPage, pageMetrics, userPrefs, miniTitleFontSettings) {
+    function createEnhancedDaysOfWeekRow(leftPage, rightPage, leftPageMetrics, rightPageMetrics, userPrefs, miniTitleFontSettings) {
         try {
             // Left page: Sunday-Wednesday
             var leftDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday'];
             
             // Calculate top position for headers row (after the general header)
-            var headerY = pageMetrics.margins.top + 10;
+            var headerY = leftPageMetrics.margins.top + 10;
             var headerHeight = 30;
-            var columnWidth = pageMetrics.usable.width / 4; // 4 columns on left page
+            var leftColumnWidth = leftPageMetrics.usable.width / 4; // 4 columns on left page
+            var rightColumnWidth = rightPageMetrics.usable.width / 4; // 4 columns on right page
             
-            // Create colored header row for day names on left page
+            // Create colored header row for day names on left page (using left page metrics)
             var leftHeaderBox = leftPage.rectangles.add({
                 geometricBounds: [
                     headerY,
-                    leftPage.bounds[1] + pageMetrics.margins.left,
+                    leftPage.bounds[1] + leftPageMetrics.margins.left, // Uses binding-aware left margin
                     headerY + headerHeight,
-                    leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    leftPage.bounds[1] + leftPageMetrics.width - leftPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 fillColor: userPrefs.headerColorName,
                 strokeColor: "None"
@@ -113,20 +134,19 @@ var MonthSpread = (function() {
             
             // Add day name headers for left page
             for (var i = 0; i < leftDays.length; i++) {
-                createDayHeader(leftPage, leftDays[i], headerY, headerHeight, i, columnWidth, pageMetrics, miniTitleFontSettings);
+                createDayHeader(leftPage, leftDays[i], headerY, headerHeight, i, leftColumnWidth, leftPageMetrics, miniTitleFontSettings);
             }
             
             // Right page: Thursday-Saturday + Notes
             var rightDays = ['Thursday', 'Friday', 'Saturday', 'Notes'];
-            var rightColumnWidth = pageMetrics.usable.width / 4; // 4 columns on right page
             
-            // Create colored header row for day names on right page
+            // Create colored header row for day names on right page (using right page metrics)
             var rightHeaderBox = rightPage.rectangles.add({
                 geometricBounds: [
                     headerY,
-                    rightPage.bounds[1] + pageMetrics.margins.left,
+                    rightPage.bounds[1] + rightPageMetrics.margins.left, // Uses binding-aware left margin
                     headerY + headerHeight,
-                    rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    rightPage.bounds[1] + rightPageMetrics.width - rightPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 fillColor: userPrefs.headerColorName,
                 strokeColor: "None"
@@ -134,7 +154,7 @@ var MonthSpread = (function() {
             
             // Add day name headers for right page
             for (var i = 0; i < rightDays.length; i++) {
-                createDayHeader(rightPage, rightDays[i], headerY, headerHeight, i, rightColumnWidth, pageMetrics, miniTitleFontSettings);
+                createDayHeader(rightPage, rightDays[i], headerY, headerHeight, i, rightColumnWidth, rightPageMetrics, miniTitleFontSettings);
             }
             
             $.writeln("[MonthSpread] Days of week headers created with font: " + 
@@ -155,7 +175,7 @@ var MonthSpread = (function() {
      * @param {Number} headerHeight - Height of header
      * @param {Number} columnIndex - Column index
      * @param {Number} columnWidth - Width of column
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (binding-aware)
      * @param {Object} miniTitleFontSettings - Font settings for day headers
      */
     function createDayHeader(page, dayName, headerY, headerHeight, columnIndex, columnWidth, pageMetrics, miniTitleFontSettings) {
@@ -163,9 +183,9 @@ var MonthSpread = (function() {
             var dayHeader = page.textFrames.add({
                 geometricBounds: [
                     headerY + 2,
-                    page.bounds[1] + pageMetrics.margins.left + (columnIndex * columnWidth),
+                    page.bounds[1] + pageMetrics.margins.left + (columnIndex * columnWidth), // Uses binding-aware margins
                     headerY + headerHeight - 2,
-                    page.bounds[1] + pageMetrics.margins.left + ((columnIndex + 1) * columnWidth)
+                    page.bounds[1] + pageMetrics.margins.left + ((columnIndex + 1) * columnWidth) // Uses binding-aware margins
                 ],
                 contents: dayName
             });
@@ -187,33 +207,34 @@ var MonthSpread = (function() {
      * @param {Page} leftPage - Left page of the spread
      * @param {Page} rightPage - Right page of the spread
      * @param {Date} monthDate - First day of the month
-     * @param {Object} pageMetrics - Page metrics information
+     * @param {Object} leftPageMetrics - Page metrics for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page metrics for right page (binding-aware)
      * @param {Object} userPrefs - Enhanced user preferences
      * @param {Object} monthlyCalendarFontSettings - Font settings for calendar dates
      * @param {Number} headerBottom - Y position after the day headers
      */
-    function createEnhancedMonthGrid(leftPage, rightPage, monthDate, pageMetrics, userPrefs, monthlyCalendarFontSettings, headerBottom) {
+    function createEnhancedMonthGrid(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs, monthlyCalendarFontSettings, headerBottom) {
         try {
             // Calculate dates for current month
             var monthDates = Utils.getMonthDates(monthDate);
             var allDates = monthDates.prevMonthDates.concat(monthDates.currentMonthDates, monthDates.nextMonthDates);
             
-            // Calculate grid dimensions
+            // Calculate grid dimensions using left page metrics as base (they should be similar for height calculations)
             var gridTop = headerBottom + 5;
             var footerSpace = 30; // Reserve space for footer
-            var availableHeight = pageMetrics.height - gridTop - pageMetrics.margins.bottom - footerSpace;
+            var availableHeight = leftPageMetrics.height - gridTop - leftPageMetrics.margins.bottom - footerSpace;
             var numRows = monthDates.rows;
             var rowHeight = availableHeight / numRows;
-            var leftColumnWidth = pageMetrics.usable.width / 4; // 4 columns on left page
-            var rightColumnWidth = pageMetrics.usable.width / 4; // 4 columns on right page
+            var leftColumnWidth = leftPageMetrics.usable.width / 4; // 4 columns on left page
+            var rightColumnWidth = rightPageMetrics.usable.width / 4; // 4 columns on right page
             
             // Create calendar cells for each week
             for (var row = 0; row < numRows; row++) {
-                createCalendarRow(leftPage, rightPage, row, allDates, monthDate, gridTop, rowHeight, leftColumnWidth, rightColumnWidth, pageMetrics, userPrefs, monthlyCalendarFontSettings);
+                createCalendarRow(leftPage, rightPage, row, allDates, monthDate, gridTop, rowHeight, leftColumnWidth, rightColumnWidth, leftPageMetrics, rightPageMetrics, userPrefs, monthlyCalendarFontSettings);
             }
             
             // Create enhanced notes section and mini calendars on right page
-            createEnhancedNotesAndMiniCalendars(rightPage, gridTop, availableHeight, rightColumnWidth, pageMetrics, userPrefs, monthDate);
+            createEnhancedNotesAndMiniCalendars(rightPage, gridTop, availableHeight, rightColumnWidth, rightPageMetrics, userPrefs, monthDate);
             
             $.writeln("[MonthSpread] Calendar grid created with font: " + 
                      monthlyCalendarFontSettings.font + ", size: " + monthlyCalendarFontSettings.size + "pt");
@@ -234,11 +255,12 @@ var MonthSpread = (function() {
      * @param {Number} rowHeight - Height of each row
      * @param {Number} leftColumnWidth - Width of left page columns
      * @param {Number} rightColumnWidth - Width of right page columns
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} leftPageMetrics - Page metrics for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page metrics for right page (binding-aware)
      * @param {Object} userPrefs - User preferences
      * @param {Object} monthlyCalendarFontSettings - Font settings for dates
      */
-    function createCalendarRow(leftPage, rightPage, row, allDates, monthDate, gridTop, rowHeight, leftColumnWidth, rightColumnWidth, pageMetrics, userPrefs, monthlyCalendarFontSettings) {
+    function createCalendarRow(leftPage, rightPage, row, allDates, monthDate, gridTop, rowHeight, leftColumnWidth, rightColumnWidth, leftPageMetrics, rightPageMetrics, userPrefs, monthlyCalendarFontSettings) {
         try {
             var rowTop = gridTop + (row * rowHeight);
             var rowBottom = rowTop + rowHeight;
@@ -252,17 +274,19 @@ var MonthSpread = (function() {
                 var isCurrentMonth = currentDate.getMonth() === monthDate.getMonth();
                 
                 // Determine which page and column this day goes in
-                var page, columnWidth, x;
+                var page, columnWidth, pageMetrics, x;
                 if (col < 4) {
                     // Sunday-Wednesday on left page
                     page = leftPage;
                     columnWidth = leftColumnWidth;
-                    x = page.bounds[1] + pageMetrics.margins.left + (col * columnWidth);
+                    pageMetrics = leftPageMetrics;
+                    x = page.bounds[1] + pageMetrics.margins.left + (col * columnWidth); // Uses binding-aware margins
                 } else {
                     // Thursday-Saturday on right page
                     page = rightPage;
                     columnWidth = rightColumnWidth;
-                    x = page.bounds[1] + pageMetrics.margins.left + ((col - 4) * columnWidth);
+                    pageMetrics = rightPageMetrics;
+                    x = page.bounds[1] + pageMetrics.margins.left + ((col - 4) * columnWidth); // Uses binding-aware margins
                 }
                 
                 createMonthCalendarCell(page, currentDate, isCurrentMonth, rowTop, rowBottom, x, columnWidth, userPrefs, monthlyCalendarFontSettings);
@@ -326,7 +350,7 @@ var MonthSpread = (function() {
      * @param {Number} gridTop - Top of grid area
      * @param {Number} availableHeight - Available height for content
      * @param {Number} rightColumnWidth - Width of right page columns
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (binding-aware)
      * @param {Object} userPrefs - User preferences
      * @param {Date} monthDate - Current month date
      */
@@ -335,7 +359,7 @@ var MonthSpread = (function() {
             var weeklyContentFontSettings = getWeeklyContentFontSettings(userPrefs);
             var miniTitleFontSettings = getMiniCalendarTitleFontSettings(userPrefs);
             
-            // Create notes section in 4th column on right page (all rows)
+            // Create notes section in 4th column on right page (all rows) using binding-aware margins
             var notesX = rightPage.bounds[1] + pageMetrics.margins.left + (3 * rightColumnWidth);
             var notesWidth = rightColumnWidth;
             
@@ -409,7 +433,7 @@ var MonthSpread = (function() {
      * @param {Number} fixedRowHeight - Height of each row
      * @param {Number} notesX - X position
      * @param {Number} notesWidth - Width available
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (binding-aware)
      * @param {Object} userPrefs - User preferences
      * @param {Object} miniTitleFontSettings - Font settings for calendar titles
      */

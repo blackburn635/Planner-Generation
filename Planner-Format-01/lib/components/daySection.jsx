@@ -1,7 +1,7 @@
 // Planner-Format-01/lib/components/daySection.jsx
 
 /*******************************************************************************
- * Enhanced Day Section Component
+ * Enhanced Day Section Component - With Binding-Aware Margins
  * 
  * Creates daily sections for the weekly spreads, including:
  * - Colored headers with day and date
@@ -14,6 +14,7 @@
  * - Supports user-defined font sizes for all text elements
  * - Enhanced error handling and formatting options
  * - Maintains backward compatibility
+ * - NEW: Uses binding-aware margins when pageMetrics contains effective margins
  *******************************************************************************/
 
 var DaySection = (function() {
@@ -23,7 +24,7 @@ var DaySection = (function() {
      * @param {Date} date - The date for this section
      * @param {Number} sectionIndex - Which section on the page (0-based)
      * @param {Number} sectionHeight - Height of each section
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
     function createDaySection(page, date, sectionIndex, sectionHeight, pageMetrics, userPrefs) {
@@ -39,9 +40,9 @@ var DaySection = (function() {
             var dateBox = page.rectangles.add({
                 geometricBounds: [
                     yPosition,
-                    page.bounds[1] + pageMetrics.margins.left, // Use page bounds for correct x position
+                    page.bounds[1] + pageMetrics.margins.left, // Uses binding-aware left margin
                     yPosition + headerHeight,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 fillColor: userPrefs.headerColorName,
                 strokeColor: "None"
@@ -52,9 +53,9 @@ var DaySection = (function() {
             var dayText = page.textFrames.add({
                 geometricBounds: [
                     yPosition + 2,
-                    page.bounds[1] + pageMetrics.margins.left + 4,
+                    page.bounds[1] + pageMetrics.margins.left + 4, // Uses binding-aware left margin
                     yPosition + headerHeight - 2,
-                    page.bounds[1] + pageMetrics.margins.left + pageMetrics.usable.width * 0.5
+                    page.bounds[1] + pageMetrics.margins.left + pageMetrics.usable.width * 0.5 // Uses binding-aware margins
                 ],
                 contents: dayDateContent
             });
@@ -79,9 +80,9 @@ var DaySection = (function() {
             var todoText = page.textFrames.add({
                 geometricBounds: [
                     yPosition + 2,
-                    page.bounds[1] + pageMetrics.margins.left + pageMetrics.usable.width * 0.7,
+                    page.bounds[1] + pageMetrics.margins.left + pageMetrics.usable.width * 0.7, // Uses binding-aware margins
                     yPosition + headerHeight - 2,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right - 4
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right - 4 // Uses binding-aware right margin
                 ],
                 contents: "Things To Do"
             });
@@ -104,9 +105,9 @@ var DaySection = (function() {
             var contentText = page.textFrames.add({
                 geometricBounds: [
                     yPosition + headerHeight + 2,
-                    page.bounds[1] + pageMetrics.margins.left,
+                    page.bounds[1] + pageMetrics.margins.left, // Uses binding-aware left margin
                     yPosition + sectionHeight - 2,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: " " // Add a space to ensure we have a text element to style
             });
@@ -158,7 +159,7 @@ var DaySection = (function() {
      * @param {Number} yPosition - Top position of the section
      * @param {Number} headerHeight - Height of the colored header
      * @param {Number} sectionHeight - Total height of the section
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (now supports binding-aware margins)
      * @param {Object} userPrefs - User preferences
      */
     function createRulingLines(page, yPosition, headerHeight, sectionHeight, pageMetrics, userPrefs) {
@@ -175,8 +176,8 @@ var DaySection = (function() {
                     strokeTint: 20
                 });
                 line.paths.item(0).entirePath = [
-                    [page.bounds[1] + pageMetrics.margins.left, lineY],
-                    [page.bounds[1] + pageMetrics.width - pageMetrics.margins.right, lineY]
+                    [page.bounds[1] + pageMetrics.margins.left, lineY], // Uses binding-aware left margin
+                    [page.bounds[1] + pageMetrics.width - pageMetrics.margins.right, lineY] // Uses binding-aware right margin
                 ];
             }
         } catch (e) {
@@ -191,7 +192,7 @@ var DaySection = (function() {
      * @param {Number} yPosition - Top position of the section
      * @param {Number} headerHeight - Height of the colored header
      * @param {Number} sectionHeight - Total height of the section
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (now supports binding-aware margins)
      * @param {Object} userPrefs - User preferences
      */
     function createVerticalDivider(page, yPosition, headerHeight, sectionHeight, pageMetrics, userPrefs) {
@@ -204,7 +205,7 @@ var DaySection = (function() {
                 strokeTint: 100
             });
             
-            // Calculate middle position (based on 50% of usable width)
+            // Calculate middle position (based on 50% of usable width) using binding-aware margins
             var dividerX = page.bounds[1] + pageMetrics.margins.left + (pageMetrics.usable.width * 0.5);
             
             // Set line path from top to bottom of the section

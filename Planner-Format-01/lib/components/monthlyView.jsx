@@ -1,7 +1,7 @@
 // Planner-Format-01/lib/components/monthlyView.jsx
 
 /*******************************************************************************
- * Enhanced Monthly View Component
+ * Enhanced Monthly View Component - With Binding-Aware Margins
  * 
  * Creates the 3-month mini calendar view that appears on the right page of weekly
  * spreads. This includes:
@@ -17,6 +17,7 @@
  * - Supports user-defined font sizes for all text elements
  * - Enhanced error handling and modular structure
  * - Maintains backward compatibility
+ * - NEW: Uses binding-aware margins when pageMetrics contains effective margins
  *******************************************************************************/
 
 var MonthlyView = (function() {
@@ -24,7 +25,7 @@ var MonthlyView = (function() {
      * Creates the monthly section with 3-month calendar view
      * @param {Page} page - The page to add the section to
      * @param {Number} sectionHeight - Height of each section
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      * @param {Date} sundayDate - Date of Sunday for this week
      * @param {Number} weekNumber - Current week number
@@ -39,13 +40,13 @@ var MonthlyView = (function() {
             var weeklyContentFontSettings = getWeeklyContentFontSettings(userPrefs);
             var miniTitleFontSettings = getMiniCalendarTitleFontSettings(userPrefs);
             
-            // Create colored header box
+            // Create colored header box using binding-aware margins
             var monthBox = page.rectangles.add({
                 geometricBounds: [
                     yPosition,
-                    page.bounds[1] + pageMetrics.margins.left,
+                    page.bounds[1] + pageMetrics.margins.left, // Uses binding-aware left margin
                     yPosition + headerHeight,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 fillColor: userPrefs.headerColorName,
                 strokeColor: "None"
@@ -55,9 +56,9 @@ var MonthlyView = (function() {
             var monthText = page.textFrames.add({
                 geometricBounds: [
                     yPosition + 2,
-                    page.bounds[1] + pageMetrics.margins.left + 4,
+                    page.bounds[1] + pageMetrics.margins.left + 4, // Uses binding-aware left margin
                     yPosition + headerHeight - 2,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right - 4
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right - 4 // Uses binding-aware right margin
                 ],
                 contents: "3-Month Overview"
             });
@@ -80,7 +81,7 @@ var MonthlyView = (function() {
             var nextMonth = new Date(sundayDate.getFullYear(), sundayDate.getMonth() + 1, 1);
             var thirdMonth = new Date(sundayDate.getFullYear(), sundayDate.getMonth() + 2, 1);
             
-            // Calculate the width of each mini calendar
+            // Calculate the width of each mini calendar (using binding-aware usable width)
             var calendarWidth = (pageMetrics.usable.width - 20) / 3; // 20 = padding between calendars
             
             // Reduce the height proportion to prevent extension into footer
@@ -116,14 +117,14 @@ var MonthlyView = (function() {
      * @param {Number} monthNameHeight - Height for month name
      * @param {Number} heightRatio - Height ratio for calendars
      * @param {Number} weekNumber - Current week number for highlighting
-     * @param {Object} pageMetrics - Page metrics
+     * @param {Object} pageMetrics - Page metrics (now supports binding-aware margins)
      * @param {Object} userPrefs - User preferences
      * @param {Array} monthNames - Array of month names
      * @param {Object} miniTitleFontSettings - Font settings for month titles
      */
     function createMonthNameAndCalendar(page, monthDate, calendarIndex, calendarWidth, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings) {
         try {
-            // Calculate X position for this calendar
+            // Calculate X position for this calendar using binding-aware margins
             var calendarX = page.bounds[1] + pageMetrics.margins.left + (calendarIndex * (calendarWidth + 5)) + 5;
             
             // Add month name header
@@ -205,7 +206,7 @@ var MonthlyView = (function() {
      * Returns the relative coordinates for the Monthly section
      * This is useful for other scripts that need to add content to this area
      * @param {Page} page - The page to calculate coordinates for
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @returns {Object} Coordinates of the top left corner of the monthly section
      */
     function getMonthlyCoordinates(page, pageMetrics) {
@@ -217,12 +218,12 @@ var MonthlyView = (function() {
         // Calculate position to align with the fourth section
         var yPosition = pageMetrics.margins.top + (3 * sectionHeight); // Position after 3 day sections
         
-        // Return the coordinates of the start of the content area (after the header)
+        // Return the coordinates of the start of the content area (after the header) using binding-aware margins
         return {
-            x: page.bounds[1] + pageMetrics.margins.left,
+            x: page.bounds[1] + pageMetrics.margins.left, // Uses binding-aware left margin
             y: yPosition + headerHeight,
             headerY: yPosition, // Include the banner position for reference
-            width: pageMetrics.usable.width,
+            width: pageMetrics.usable.width, // Uses binding-aware usable width
             height: sectionHeight - headerHeight
         };
     }
@@ -231,7 +232,7 @@ var MonthlyView = (function() {
      * NEW IN V03: Creates an enhanced monthly section with additional customization options
      * @param {Page} page - The page to add the section to
      * @param {Number} sectionHeight - Height of each section
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - Enhanced user preferences
      * @param {Date} sundayDate - Date of Sunday for this week
      * @param {Number} weekNumber - Current week number

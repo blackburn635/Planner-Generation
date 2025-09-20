@@ -1,7 +1,7 @@
 // Planner-Format-01/lib/components/header.jsx
 
 /*******************************************************************************
- * Enhanced Header Component
+ * Enhanced Header Component - With Binding-Aware Margins
  * 
  * Creates headers for weekly and monthly spreads, including:
  * - Week date range headers
@@ -12,6 +12,7 @@
  * - Supports user-defined font sizes
  * - Maintains backward compatibility
  * - Enhanced error handling and formatting
+ * - NEW: Supports binding-aware margins when pageMetrics contains effective margins
  *******************************************************************************/
 
 var Header = (function() {
@@ -20,17 +21,18 @@ var Header = (function() {
      * @param {Page} page - The page to add the header to
      * @param {Date} startDate - First day of the week
      * @param {Date} endDate - Last day of the week
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} pageMetrics - Page size and margin information (now supports binding-aware margins)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
+     * @param {Justification} justification - Text justification for the header
      */
     function createWeekHeader(page, startDate, endDate, pageMetrics, userPrefs, justification) {
         try {
             var headerText = page.textFrames.add({
                 geometricBounds: [
                     pageMetrics.margins.top - 20, // Move up to create space
-                    page.bounds[1] + pageMetrics.margins.left,
+                    page.bounds[1] + pageMetrics.margins.left, // Uses binding-aware left margin
                     pageMetrics.margins.top,
-                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    page.bounds[1] + pageMetrics.width - pageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: "Week of " + Utils.formatDate(startDate) + " - " + Utils.formatDate(endDate)
             });
@@ -80,10 +82,18 @@ var Header = (function() {
      * @param {Page} leftPage - Left page of the spread
      * @param {Page} rightPage - Right page of the spread
      * @param {Date} monthDate - First day of the month
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} leftPageMetrics - Page size and margin information for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page size and margin information for right page (binding-aware)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
-    function createMonthHeader(leftPage, rightPage, monthDate, pageMetrics, userPrefs) {
+    function createMonthHeader(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs) {
+        // Handle both old and new function signatures for backward compatibility
+        if (arguments.length === 5 && typeof leftPageMetrics === 'object' && !rightPageMetrics) {
+            // Old signature: (leftPage, rightPage, monthDate, pageMetrics, userPrefs)
+            rightPageMetrics = leftPageMetrics; // Use same metrics for both pages
+            userPrefs = arguments[4];
+        }
+        
         try {
             var monthNames = ["January", "February", "March", "April", "May", "June", 
                               "July", "August", "September", "October", "November", "December"];
@@ -96,13 +106,13 @@ var Header = (function() {
             var color = userPrefs.pageTitleColor || userPrefs.titleFontColor || "Black";
             var size = userPrefs.pageTitleSize || 18; // Default to 18pt for month headers if not specified
             
-            // Create month and year text centered on left page
+            // Create month and year text centered on left page (using left page metrics)
             var leftMonthText = leftPage.textFrames.add({
                 geometricBounds: [
-                    pageMetrics.margins.top - 20,
-                    leftPage.bounds[1] + pageMetrics.margins.left,
-                    pageMetrics.margins.top,
-                    leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    leftPageMetrics.margins.top - 20,
+                    leftPage.bounds[1] + leftPageMetrics.margins.left, // Uses binding-aware left margin
+                    leftPageMetrics.margins.top,
+                    leftPage.bounds[1] + leftPageMetrics.width - leftPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: fullHeaderText
             });
@@ -126,13 +136,13 @@ var Header = (function() {
                 throw new Error("Error formatting left month header: " + leftFormatError.message);
             }
             
-            // Create month and year text centered on right page
+            // Create month and year text centered on right page (using right page metrics)
             var rightMonthText = rightPage.textFrames.add({
                 geometricBounds: [
-                    pageMetrics.margins.top - 20,
-                    rightPage.bounds[1] + pageMetrics.margins.left,
-                    pageMetrics.margins.top,
-                    rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    rightPageMetrics.margins.top - 20,
+                    rightPage.bounds[1] + rightPageMetrics.margins.left, // Uses binding-aware left margin
+                    rightPageMetrics.margins.top,
+                    rightPage.bounds[1] + rightPageMetrics.width - rightPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: fullHeaderText
             });

@@ -1,7 +1,7 @@
 // Planner-Format-01/lib/components/footer.jsx
 
 /*******************************************************************************
- * Enhanced Footer Component
+ * Enhanced Footer Component - Simplified Binding-Aware Support
  * 
  * Creates footers for the weekly spreads, including:
  * - Week number display
@@ -13,6 +13,7 @@
  * - Maintains visual hierarchy with headers while ensuring consistency
  * - Enhanced error handling and formatting options
  * - Supports user-defined font sizes with automatic reduction
+ * - FIXED: Simple binding-aware margin support
  *******************************************************************************/
 
 var Footer = (function() {
@@ -21,31 +22,46 @@ var Footer = (function() {
      * @param {Page} leftPage - Left page of the spread
      * @param {Page} rightPage - Right page of the spread
      * @param {Number} weekNumber - Current week number
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} leftPageMetrics - Page metrics for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page metrics for right page (binding-aware) 
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      * @param {Date} startDate - Start date of the week
      * @param {Date} endDate - End date of the week
      */
-    function createWeekFooter(leftPage, rightPage, weekNumber, pageMetrics, userPrefs, startDate, endDate) {
+    function createWeekFooter(leftPage, rightPage, weekNumber, leftPageMetrics, rightPageMetrics, userPrefs, startDate, endDate) {
+        // Handle both old signature (with single pageMetrics) and new signature
+        if (arguments.length === 7 && typeof leftPageMetrics === 'object' && !leftPageMetrics.margins) {
+            // Old signature: (leftPage, rightPage, weekNumber, pageMetrics, userPrefs, startDate, endDate)
+            var pageMetrics = leftPageMetrics;  // 4th argument is actually pageMetrics
+            userPrefs = rightPageMetrics;       // 5th argument is actually userPrefs
+            startDate = arguments[5];
+            endDate = arguments[6];
+            
+            // Use same metrics for both pages
+            leftPageMetrics = pageMetrics;
+            rightPageMetrics = pageMetrics;
+        }
+        
         try {
             // Check if required arguments are provided
-            if (!leftPage || !rightPage || !pageMetrics || !userPrefs || !startDate || !endDate) {
+            if (!leftPage || !rightPage || !leftPageMetrics || !userPrefs || !startDate || !endDate) {
                 throw new Error("Invalid arguments: One or more required parameters are undefined.");
             }
     
             // NEW IN V03: Get footer font settings (header font but 2 points smaller)
             var footerFontSettings = getFooterFontSettings(userPrefs);
             
-            var footerY = pageMetrics.height - pageMetrics.margins.bottom;
+            var leftFooterY = leftPageMetrics.height - leftPageMetrics.margins.bottom;
+            var rightFooterY = rightPageMetrics.height - rightPageMetrics.margins.bottom;
             var weekText = "Week " + weekNumber;
     
-            // Add week number to left page footer - LEFT JUSTIFIED
+            // Add week number to left page footer - LEFT JUSTIFIED (using left page metrics)
             var leftFooter = leftPage.textFrames.add({
                 geometricBounds: [
-                    footerY + 2,  // Smaller gap (was +5)
-                    leftPage.bounds[1] + pageMetrics.margins.left,
-                    footerY + 20, // Shorter height (was +25)
-                    leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    leftFooterY + 2,  // Smaller gap (was +5)
+                    leftPage.bounds[1] + leftPageMetrics.margins.left, // Uses binding-aware left margin
+                    leftFooterY + 20, // Shorter height (was +25)
+                    leftPage.bounds[1] + leftPageMetrics.width - leftPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: weekText
             });
@@ -64,13 +80,13 @@ var Footer = (function() {
                 throw new Error("Error formatting left week footer: " + leftFormatError.message);
             }
     
-            // Add week number to right page footer - RIGHT JUSTIFIED
+            // Add week number to right page footer - RIGHT JUSTIFIED (using right page metrics)
             var rightFooter = rightPage.textFrames.add({
                 geometricBounds: [
-                    footerY + 2,  // Smaller gap (was +5)
-                    rightPage.bounds[1] + pageMetrics.margins.left,
-                    footerY + 20, // Shorter height (was +25)
-                    rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    rightFooterY + 2,  // Smaller gap (was +5)
+                    rightPage.bounds[1] + rightPageMetrics.margins.left, // Uses binding-aware left margin
+                    rightFooterY + 20, // Shorter height (was +25)
+                    rightPage.bounds[1] + rightPageMetrics.width - rightPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: weekText
             });
@@ -100,27 +116,40 @@ var Footer = (function() {
      * @param {Page} leftPage - Left page of the spread
      * @param {Page} rightPage - Right page of the spread
      * @param {Date} monthDate - First day of the month
-     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} leftPageMetrics - Page metrics for left page (binding-aware)
+     * @param {Object} rightPageMetrics - Page metrics for right page (binding-aware)
      * @param {Object} userPrefs - Enhanced user preferences with granular font settings
      */
-    function createMonthFooter(leftPage, rightPage, monthDate, pageMetrics, userPrefs) {
+    function createMonthFooter(leftPage, rightPage, monthDate, leftPageMetrics, rightPageMetrics, userPrefs) {
+        // Handle both old signature (with single pageMetrics) and new signature
+        if (arguments.length === 5 && typeof leftPageMetrics === 'object' && !leftPageMetrics.margins) {
+            // Old signature: (leftPage, rightPage, monthDate, pageMetrics, userPrefs)
+            var pageMetrics = leftPageMetrics;  // 4th argument is actually pageMetrics
+            userPrefs = rightPageMetrics;       // 5th argument is actually userPrefs
+            
+            // Use same metrics for both pages
+            leftPageMetrics = pageMetrics;
+            rightPageMetrics = pageMetrics;
+        }
+        
         try {
             // NEW IN V03: Get footer font settings (header font but 2 points smaller)
             var footerFontSettings = getFooterFontSettings(userPrefs);
             
-            var footerY = pageMetrics.height - pageMetrics.margins.bottom;
+            var leftFooterY = leftPageMetrics.height - leftPageMetrics.margins.bottom;
+            var rightFooterY = rightPageMetrics.height - rightPageMetrics.margins.bottom;
             var monthNames = ["January", "February", "March", "April", "May", "June", 
                               "July", "August", "September", "October", "November", "December"];
             var monthName = monthNames[monthDate.getMonth()];
             var footerText = monthName + " " + monthDate.getFullYear();
             
-            // Add month name to left page footer - LEFT JUSTIFIED
+            // Add month name to left page footer - LEFT JUSTIFIED (using left page metrics)
             var leftFooter = leftPage.textFrames.add({
                 geometricBounds: [
-                    footerY + 5,  // Adjust position to be below content area
-                    leftPage.bounds[1] + pageMetrics.margins.left,
-                    footerY + 25,
-                    leftPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    leftFooterY + 5,  // Adjust position to be below content area
+                    leftPage.bounds[1] + leftPageMetrics.margins.left, // Uses binding-aware left margin
+                    leftFooterY + 25,
+                    leftPage.bounds[1] + leftPageMetrics.width - leftPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: footerText
             });
@@ -136,13 +165,13 @@ var Footer = (function() {
                 throw new Error("Error formatting left month footer: " + leftFormatError.message);
             }
 
-            // Add month name to right page footer - RIGHT JUSTIFIED
+            // Add month name to right page footer - RIGHT JUSTIFIED (using right page metrics)
             var rightFooter = rightPage.textFrames.add({
                 geometricBounds: [
-                    footerY + 5,  // Adjust position to be below content area
-                    rightPage.bounds[1] + pageMetrics.margins.left,
-                    footerY + 25,
-                    rightPage.bounds[1] + pageMetrics.width - pageMetrics.margins.right
+                    rightFooterY + 5,  // Adjust position to be below content area
+                    rightPage.bounds[1] + rightPageMetrics.margins.left, // Uses binding-aware left margin
+                    rightFooterY + 25,
+                    rightPage.bounds[1] + rightPageMetrics.width - rightPageMetrics.margins.right // Uses binding-aware right margin
                 ],
                 contents: footerText
             });
