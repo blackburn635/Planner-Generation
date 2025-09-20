@@ -36,6 +36,7 @@
 //@include "lib/components/monthSpread.jsx"
 //@include "lib/components/calendarGrid.jsx"
 //@include "lib/components/qrcodeGen.jsx"
+//@include "lib/qrcode.jsx"  
 
 // Initialize the script with error handling
 try {
