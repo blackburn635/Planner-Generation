@@ -61,7 +61,7 @@ var MonthSpread = (function() {
             Header.createMonthHeader(leftPage, rightPage, monthDate, pageMetrics, userPrefs);
             
             // Create calendar grid - days of week row
-            var headerHeight = createEnhancedDaysOfWeekRow(leftPage, rightPage, pageMetrics, userPrefs, miniTitleFontSettings);
+            var headerHeight = createEnhancedDaysOfWeekRow(leftPage, rightPage, pageMetrics, userPrefs, weeklyContentFontSettings);
             
             // Create the calendar grid cells for the month
             createEnhancedMonthGrid(leftPage, rightPage, monthDate, pageMetrics, userPrefs, monthlyCalendarFontSettings, headerHeight);

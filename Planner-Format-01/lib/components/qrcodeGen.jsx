@@ -20,7 +20,7 @@ var QRCodeGen = (function() {
      * @param {Object} userPrefs - User preferences for fonts and colors
      * @returns {PageItem} The placed QR code item
      */
-
+    $.writeln("QRCodeGen Called");
     function createQRCode(page, startDate, endDate, pageType, pageMetrics, userPrefs) {
         try {
             var templateCode = "01";
