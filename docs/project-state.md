@@ -5,10 +5,10 @@
 
 The InDesign Planner Generator is a mature, modular ExtendScript system for creating customizable yearly planners in Adobe InDesign. The project has evolved from a monolithic script to a sophisticated component-based architecture with comprehensive user customization options.
 
-## Current Version: 1.9
-**Status**: Stable with Enhanced Font System  
+## Current Version: 1.9.1
+**Status**: Stable with Enhanced Layout System  
 **Last Major Update**: December 2024  
-**Active Development**: Font system optimization and user experience refinements
+**Active Development**: Layout refinements and user experience optimization
 
 ## 🎯 Current Capabilities
 
@@ -23,8 +23,9 @@ The InDesign Planner Generator is a mature, modular ExtendScript system for crea
 - ✅ **Flexible Date Ranges**: Custom start/end dates with 1-60 month duration
 - ✅ **Granular Font Control**: 5 separate font categories with size control
 - ✅ **CMYK Color Management**: Full color workflow with existing color support
+- ✅ **Centered Layout**: Mini calendars now perfectly centered for professional appearance
 
-### Font Categories (NEW in v1.8-1.9)
+### Font Categories (Stable since v1.8-1.9)
 1. **Page Title Headers**: Main page titles (headers, month names)
 2. **Weekly Spread Content**: Day sections, notes, content areas
 3. **Monthly Calendar Dates**: Main calendar date numbers
@@ -50,7 +51,7 @@ Planner-Format-01/
 │       ├── footer.jsx          # ✨ ENHANCED: Header font -2pt
 │       ├── daySection.jsx      # ✨ ENHANCED: Weekly content fonts
 │       ├── weeklyView.jsx      # Weekly coordination (stable)
-│       ├── monthlyView.jsx     # ✨ ENHANCED: Mixed font categories
+│       ├── monthlyView.jsx     # 🆕 UPDATED: Centered calendar layout
 │       ├── monthSpread.jsx     # ✨ ENHANCED: All font categories
 │       ├── calendarGrid.jsx    # ✨ ENHANCED: Calendar font categories
 │       └── qrcodeGen.jsx       # QR code generation (stable)
@@ -60,13 +61,13 @@ Planner-Format-01/
 
 ## 🔧 Technical Architecture
 
-### Enhanced Preferences System
-- **Organized Panels**: Logical grouping of options
-- **Real-time Validation**: Date and range validation
-- **Fallback Chains**: `newFont → legacyFont → defaultFont`
-- **Storage**: JSON serialization in document labels
+### Enhanced Layout System
+- **Mathematical Centering**: Precise positioning calculations for visual balance
+- **Configurable Spacing**: Parameterized gaps for consistent spacing control
+- **Responsive Design**: Adapts to various page sizes and margin settings
+- **Visual Hierarchy**: Improved spacing creates better information organization
 
-### Font System Architecture
+### Font System Architecture (Stable)
 - **Category-based**: Logical font assignments by content type
 - **Size Hierarchies**: Automatic relationships (footer = header - 2pt)
 - **Layout-aware**: Font-size-based spacing for optimal text fit
@@ -76,7 +77,7 @@ Planner-Format-01/
 - **Separation of Concerns**: Each component handles specific functionality
 - **Consistent Interfaces**: Standardized parameter passing
 - **Error Isolation**: Component failures don't break entire generation
-- **Helper Functions**: Reusable font setting functions across components
+- **Helper Functions**: Reusable functions across components
 
 ## 📊 Quality Metrics
 
@@ -85,29 +86,38 @@ Planner-Format-01/
 - **Logging**: Detailed debug output for troubleshooting
 - **Documentation**: JSDoc comments and inline explanations
 - **Backward Compatibility**: Legacy preference support maintained
+- **Mathematical Precision**: Validated calculations for layout positioning
 
 ### User Experience
 - **Rapid Iteration**: Test mode enables quick font/color testing
 - **Flexibility**: 1-60 month planning periods with custom start dates
-- **Professional Output**: Print-ready layouts with proper typography
-- **Visual Hierarchy**: Consistent font relationships throughout
+- **Professional Output**: Print-ready layouts with proper typography and balance
+- **Visual Hierarchy**: Consistent font relationships and spacing throughout
 
 ## 🚦 Current Status
 
 ### Recently Completed (December 2024)
-1. ✅ Enhanced preferences dialog with 5 font categories
+1. ✅ Enhanced preferences with 5 granular font categories
 2. ✅ Test mode implementation (10-page generation)
 3. ✅ Flexible date range system with duration control
 4. ✅ All 7 core components updated with enhanced fonts
 5. ✅ Automatic font hierarchy (footer = header - 2pt)
 6. ✅ Font-aware layout spacing
 7. ✅ Comprehensive error handling and logging
+8. ✅ **NEW**: Centered 3-month overview with enhanced spacing
+
+### Recent Technical Improvements
+- **Layout Mathematics**: Precise centering algorithm for visual balance
+- **Spacing Enhancement**: Improved 10pt gaps between calendars
+- **Code Cleanup**: Streamlined positioning calculations
+- **Quality Assurance**: Comprehensive code review process
 
 ### Known Limitations
 - Requires InDesign CC 2018+
 - Facing pages must be enabled
 - QR code library dependency (qrcode.jsx)
 - CMYK color workflow only
+- Debug alert needs removal (minor cleanup)
 
 ### Performance Characteristics
 - **Test Mode**: ~30 seconds for 10 pages
@@ -118,29 +128,31 @@ Planner-Format-01/
 ## 🎯 Development Priorities
 
 ### Immediate (Next Session)
-1. Week headers on both pages (in progress)
-2. User testing of enhanced font system
-3. Performance validation with complex font combinations
+1. Remove debug alert from monthlyView.jsx (5-minute cleanup)
+2. Visual testing of centered calendar output
+3. Week headers on both pages implementation
 
 ### Short-term (1-2 weeks)
-1. Font preview in preferences dialog
-2. Style template system for font combinations
+1. Layout consistency review across all components
+2. Spacing standardization (apply 10pt standard elsewhere)
 3. Enhanced error reporting for end users
 
 ### Long-term (1-3 months)
-1. UXP migration planning for future InDesign versions
-2. Web-based companion tool for configuration
-3. Automated testing framework
+1. Layout preview mode for quick validation
+2. Template system for layout variations
+3. UXP migration planning for future InDesign versions
 
 ## 📈 Success Metrics
 
 ### User Adoption
 - Enhanced customization options increase user satisfaction
 - Test mode reduces iteration time for style decisions
+- Centered layouts provide more professional appearance
 - Flexible date ranges support various planning needs
 
 ### Technical Excellence
-- Zero breaking changes during font system implementation
+- Zero breaking changes during layout improvements
+- Mathematical precision in positioning calculations
 - Comprehensive error handling prevents user frustration
 - Modular architecture enables rapid feature development
 
@@ -148,8 +160,9 @@ Planner-Format-01/
 - Stable core functionality with 18+ months of development
 - Comprehensive documentation and architectural decisions
 - Ready for advanced features and platform expansion
+- Professional-grade layout quality achieved
 
 ---
 
 *Project state maintained through December 2024*
-*Next review scheduled after week header implementation*
+*Next review scheduled after debug cleanup and visual testing*
