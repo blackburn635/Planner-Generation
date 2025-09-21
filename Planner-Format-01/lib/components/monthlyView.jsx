@@ -81,8 +81,11 @@ var MonthlyView = (function() {
             var nextMonth = new Date(sundayDate.getFullYear(), sundayDate.getMonth() + 1, 1);
             var thirdMonth = new Date(sundayDate.getFullYear(), sundayDate.getMonth() + 2, 1);
             
+            // Set the spacing between mini-Calendas
+            var calendarSpacing = 10; // 10 point spacing between calendars    
+            
             // Calculate the width of each mini calendar (using binding-aware usable width)
-            var calendarWidth = (pageMetrics.usable.width - 20) / 3; // 20 = padding between calendars
+            var calendarWidth = (pageMetrics.usable.width - (calendarSpacing*3)) / 3; // 20 = padding between calendars
             
             // Reduce the height proportion to prevent extension into footer
             var heightRatio = 0.80; // Reduced from the default 0.85 to make calendars 5pt shorter
@@ -96,9 +99,9 @@ var MonthlyView = (function() {
             var contentY = yPosition + headerHeight + 5;
             
             // Create month name headers and mini calendars
-            createMonthNameAndCalendar(page, currentMonth, 0, calendarWidth, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
-            createMonthNameAndCalendar(page, nextMonth, 1, calendarWidth, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
-            createMonthNameAndCalendar(page, thirdMonth, 2, calendarWidth, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
+            createMonthNameAndCalendar(page, currentMonth, 0, calendarWidth, calendarSpacing, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
+            createMonthNameAndCalendar(page, nextMonth, 1, calendarWidth, calendarSpacing, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
+            createMonthNameAndCalendar(page, thirdMonth, 2, calendarWidth, calendarSpacing, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings);
             
             $.writeln("[MonthlyView] 3-month overview created with enhanced font settings");
             
@@ -122,10 +125,10 @@ var MonthlyView = (function() {
      * @param {Array} monthNames - Array of month names
      * @param {Object} miniTitleFontSettings - Font settings for month titles
      */
-    function createMonthNameAndCalendar(page, monthDate, calendarIndex, calendarWidth, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings) {
+    function createMonthNameAndCalendar(page, monthDate, calendarIndex, calendarWidth, calendarSpacing, contentY, monthNameHeight, heightRatio, weekNumber, pageMetrics, userPrefs, monthNames, miniTitleFontSettings) {
         try {
             // Calculate X position for this calendar using binding-aware margins
-            var calendarX = page.bounds[1] + pageMetrics.margins.left + (calendarIndex * (calendarWidth + 5)) + 5;
+            var calendarX = page.bounds[1] + pageMetrics.margins.left + (calendarIndex * (calendarWidth + calendarSpacing)) + (calendarSpacing/2);
             
             // Add month name header
             var monthNameText = page.textFrames.add({
@@ -133,7 +136,7 @@ var MonthlyView = (function() {
                     contentY,
                     calendarX,
                     contentY + monthNameHeight,
-                    calendarX + calendarWidth - 5
+                    calendarX + calendarWidth
                 ],
                 contents: monthNames[monthDate.getMonth()]
             });
@@ -162,7 +165,7 @@ var MonthlyView = (function() {
                 page, 
                 calendarY,
                 calendarX,
-                calendarWidth - 5,
+                calendarWidth,
                 monthDate,
                 weekNumber,
                 pageMetrics,

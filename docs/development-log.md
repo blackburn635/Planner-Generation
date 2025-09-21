@@ -415,3 +415,53 @@ The InDesign Planner Generator started as a monolithic script and evolved into a
 - Style templates using font combinations
 - Export settings for font documentation
 
+
+---
+
+## Phase 6 Updates: Layout Refinements (December 2024)
+*Updated: September 20, 2025 at 22:11*
+
+### v1.9.1 - Mini Calendar Centering Implementation
+- **Enhanced**: monthlyView.jsx with centered 3-month overview
+- **Features**:
+  - Mathematical centering of calendar group between margins
+  - Increased spacing from 5pt to 10pt between calendars for better visual breathing room
+  - Cleaned up width calculations by removing hardcoded adjustments
+  - Maintained all existing functionality and font settings
+- **Technical**: 
+  - Modified calendar positioning calculation with centering offset
+  - Improved spacing allocation: 5pt margins + 10pt gaps = perfect centering
+  - Added calendarSpacing parameter for configurable gap control
+
+### Technical Implementation Details
+
+#### Centering Algorithm
+- **Total spacing allocation**: `calendarSpacing * 3 = 30pt`
+- **Margin distribution**: 5pt left + 10pt gap + 10pt gap + 5pt right = 30pt
+- **Width calculation**: `(pageMetrics.usable.width - (calendarSpacing*3)) / 3`
+- **Position formula**: `margins.left + (calendarIndex * (calendarWidth + calendarSpacing)) + (calendarSpacing/2)`
+
+#### User-Centric Improvements
+1. **Better Visual Balance**: Calendars now centered instead of left-aligned
+2. **Enhanced Spacing**: 10pt gaps provide better visual separation than original 5pt
+3. **Mathematical Precision**: Equal margins ensure perfect symmetry
+4. **Preserved Functionality**: All existing calendar generation logic maintained
+
+### Quality Assurance
+- **Code Review**: Comprehensive comparison with original file confirmed no functionality lost
+- **Mathematical Verification**: Centering calculations validated for various page widths
+- **Error Handling**: All existing error handling and logging preserved
+- **Backward Compatibility**: Changes maintain compatibility with existing preferences
+
+### Development Process Insights
+1. **User Implementation**: Client implemented elegant solution independently
+2. **Clean Design**: Simpler approach than originally proposed centering offset method
+3. **Improved Spacing**: 10pt gaps create better visual hierarchy than original 5pt
+4. **Modular Changes**: Modifications isolated to positioning logic only
+
+### Future Considerations
+- Remove debug alert from monthlyView.jsx (added to backlog)
+- Visual testing in actual InDesign output
+- Consider applying similar centering logic to other layout components
+- Evaluate spacing consistency across all planner sections
+

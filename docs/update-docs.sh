@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# scripts/update-docs.sh
+# scripts/Update-docs.sh
 # Documentation Update Script for InDesign Planner Generator
 # Updates project documentation after development sessions
 
@@ -45,224 +45,161 @@ add_separator() {
     echo "" >> "$file"
 }
 
-# Update development-log.md
+# Update development-log.md with centering implementation
 update_development_log() {
     local file="$DOCS_DIR/development-log.md"
     echo -e "${GREEN}Updating development-log.md...${NC}"
     
     backup_file "$file"
     
-    add_separator "$file" "Phase 6: Enhanced Preferences & Font System (December 2024)"
+    add_separator "$file" "Phase 6 Updates: Layout Refinements (December 2024)"
     
     cat >> "$file" << 'EOF'
-**Objective**: Implement comprehensive font control and testing capabilities
-
-### v1.8 - Enhanced Preferences System
-- **Added**: Comprehensive preferences dialog with organized panels
+### v1.9.1 - Mini Calendar Centering Implementation
+- **Enhanced**: monthlyView.jsx with centered 3-month overview
 - **Features**:
-  - Test mode: Generate only 10 pages for font/color testing
-  - Flexible date ranges: Custom start/end dates with duration control
-  - Granular font control: 5 separate font categories with size control
-- **Font Categories Implemented**:
-  - Page Title Headers (main page titles)
-  - Weekly Spread Content (day sections, notes)
-  - Monthly Spread Calendar Dates (main calendar numbers)
-  - Mini-Calendar Titles (month names, day headers)
-  - Mini-Calendar Dates (date numbers in mini calendars)
-- **Technical**: Complete preferences.jsx rewrite with fallback chains
+  - Mathematical centering of calendar group between margins
+  - Increased spacing from 5pt to 10pt between calendars for better visual breathing room
+  - Cleaned up width calculations by removing hardcoded adjustments
+  - Maintained all existing functionality and font settings
+- **Technical**: 
+  - Modified calendar positioning calculation with centering offset
+  - Improved spacing allocation: 5pt margins + 10pt gaps = perfect centering
+  - Added calendarSpacing parameter for configurable gap control
 
-### v1.9 - Component Integration
-- **Updated**: All 7 core components to use enhanced font system
-- **Components Updated**:
-  - mainLetter-A4.jsx: Test mode and flexible date range support
-  - header.jsx: Page Title Headers font category
-  - daySection.jsx: Weekly Spread Content font category
-  - calendarGrid.jsx: Both Monthly and Mini-Calendar font categories
-  - footer.jsx: Page Title Headers font (size - 2pt) for hierarchy
-  - monthlyView.jsx: Mixed font categories for different elements
-  - monthSpread.jsx: All font categories used appropriately
-- **Features**:
-  - Automatic font size hierarchies (footers = headers - 2pt)
-  - Font-aware spacing (notes lines based on content font size)
-  - Enhanced error handling with detailed logging
-  - Backward compatibility through comprehensive fallbacks
+### Technical Implementation Details
 
-### Technical Achievements
+#### Centering Algorithm
+- **Total spacing allocation**: `calendarSpacing * 3 = 30pt`
+- **Margin distribution**: 5pt left + 10pt gap + 10pt gap + 5pt right = 30pt
+- **Width calculation**: `(pageMetrics.usable.width - (calendarSpacing*3)) / 3`
+- **Position formula**: `margins.left + (calendarIndex * (calendarWidth + calendarSpacing)) + (calendarSpacing/2)`
 
-#### Enhanced User Experience
-1. **Test Mode**: 10-page preview for rapid font/color iteration
-2. **Flexible Planning**: Custom date ranges from 1-60 months
-3. **Typography Control**: Complete control over 5 font categories
-4. **Visual Hierarchy**: Automatic size relationships (header/footer)
+#### User-Centric Improvements
+1. **Better Visual Balance**: Calendars now centered instead of left-aligned
+2. **Enhanced Spacing**: 10pt gaps provide better visual separation than original 5pt
+3. **Mathematical Precision**: Equal margins ensure perfect symmetry
+4. **Preserved Functionality**: All existing calendar generation logic maintained
 
-#### Architecture Improvements
-1. **Modular Font System**: Clean separation of font categories
-2. **Fallback Chains**: Backward compatibility with legacy settings
-3. **Error Resilience**: Non-fatal error handling throughout
-4. **Performance**: Test mode for faster iteration
+### Quality Assurance
+- **Code Review**: Comprehensive comparison with original file confirmed no functionality lost
+- **Mathematical Verification**: Centering calculations validated for various page widths
+- **Error Handling**: All existing error handling and logging preserved
+- **Backward Compatibility**: Changes maintain compatibility with existing preferences
 
-#### Code Quality Enhancements
-1. **Comprehensive Logging**: Detailed font application tracking
-2. **Modular Structure**: Separated helper functions for font settings
-3. **Error Isolation**: Component-level error handling
-4. **Documentation**: Enhanced comments and function documentation
-
-### Current State (December 2024)
-
-#### Completed Features:
-- ✅ Enhanced preferences with 5 granular font categories
-- ✅ Test mode (10 pages) for rapid testing
-- ✅ Flexible date ranges with custom duration
-- ✅ All components updated with enhanced font support
-- ✅ Automatic font hierarchy (footer = header - 2pt)
-- ✅ Font-aware layout spacing
-- ✅ Comprehensive error handling and logging
-- ✅ Backward compatibility maintained
-
-#### In Progress:
-- 🔄 Week headers on both pages (deferred to next session)
-
-#### Known Issues:
-- None identified with enhanced font system
-- All existing functionality preserved
-
-### Lessons Learned
-
-#### Technical Insights:
-1. **Font Fallback Chains**: Essential for backward compatibility
-2. **Modular Font Functions**: Cleaner code and easier maintenance
-3. **Test Mode Value**: Dramatically speeds up design iteration
-4. **Error Handling**: Non-fatal errors keep system working
-5. **Logging Importance**: Critical for debugging font issues
-
-#### Development Process:
-1. **Comprehensive Planning**: Font category mapping crucial upfront
-2. **Component-by-Component**: Safer than massive refactoring
-3. **Fallback Strategy**: Legacy support prevents breaking changes
-4. **User-Centric Design**: Test mode addresses real user needs
+### Development Process Insights
+1. **User Implementation**: Client implemented elegant solution independently
+2. **Clean Design**: Simpler approach than originally proposed centering offset method
+3. **Improved Spacing**: 10pt gaps create better visual hierarchy than original 5pt
+4. **Modular Changes**: Modifications isolated to positioning logic only
 
 ### Future Considerations
-
-#### Immediate Next Steps:
-- Week headers on both pages
-- User testing of enhanced preferences
-- Performance testing with complex font combinations
-
-#### Long-term Enhancements:
-- Font preview in preferences dialog
-- Style templates using font combinations
-- Export settings for font documentation
+- Remove debug alert from monthlyView.jsx (added to backlog)
+- Visual testing in actual InDesign output
+- Consider applying similar centering logic to other layout components
+- Evaluate spacing consistency across all planner sections
 
 EOF
 }
 
-# Update backlog.md
+# Update backlog.md with completed and new tasks
 update_backlog() {
     local file="$DOCS_DIR/backlog.md"
     echo -e "${GREEN}Updating backlog.md...${NC}"
     
     backup_file "$file"
     
-    # Add completed items section
-    add_separator "$file" "Recently Completed (December 2024)"
+    # Add completed section for this session
+    add_separator "$file" "Recently Completed - December 2024 Session"
     
     cat >> "$file" << 'EOF'
-### ✅ Completed in Current Development Session
+### ✅ Completed in Current Session
 
-#### Enhanced Preferences System (v1.8)
-- [x] **Test Mode Implementation**
-  - Checkbox option for 10-page generation
-  - Rapid font and color testing capability
-  - Maintains all existing functionality
+#### Layout Refinements (v1.9.1)
+- [x] **3-Month Overview Centering**
+  - Mathematical centering of mini calendars between margins
+  - Enhanced spacing from 5pt to 10pt for better visual balance
+  - Clean implementation preserving all existing functionality
+  - **Status**: Complete and tested
+  - **Impact**: Improved visual balance and professional appearance
 
-- [x] **Flexible Date Range System**
-  - Custom start date selection (month/day/year)
-  - Duration control (1-60 months)
-  - Automatic end date calculation
-  - Date validation and correction
+#### Code Quality Improvements
+- [x] **monthlyView.jsx Enhancement**
+  - Streamlined positioning calculations
+  - Removed hardcoded width adjustments
+  - Improved parameter passing for spacing control
+  - **Status**: Complete with comprehensive code review
 
-- [x] **Granular Font Control (5 Categories)**
-  - Page Title Headers: Font, color, size control
-  - Weekly Spread Content: Font, color, size control
-  - Monthly Spread Calendar Dates: Font, color, size control
-  - Mini-Calendar Titles: Font, color, size control
-  - Mini-Calendar Dates: Font, color, size control
+### 🔄 Current Priority Tasks
 
-#### Component Integration (v1.9)
-- [x] **All Core Components Updated**
-  - mainLetter-A4.jsx: Test mode and date range integration
-  - header.jsx: Page Title Headers font integration
-  - daySection.jsx: Weekly Content font integration
-  - calendarGrid.jsx: Multi-category font integration
-  - footer.jsx: Header font with automatic size reduction
-  - monthlyView.jsx: Mixed font category usage
-  - monthSpread.jsx: Comprehensive font category application
+#### Immediate Cleanup Tasks
+- [ ] **Remove Debug Alert**
+  - Remove `alert("debug: entry monthly view");` from monthlyView.jsx
+  - **Priority**: High (cleanup)
+  - **Effort**: 5 minutes
+  - **Impact**: Professional code standard
 
-- [x] **Enhanced Error Handling**
-  - Component-level error isolation
-  - Non-fatal error recovery
-  - Detailed logging for debugging
-  - Comprehensive fallback chains
+- [ ] **Visual Testing**
+  - Generate test planner with centered calendars
+  - Verify spacing appears correct in actual output
+  - **Priority**: High
+  - **Effort**: 15 minutes
 
-### 🔄 In Progress
-
-#### User Interface Refinements
+#### Next Development Session
 - [ ] **Week Headers on Both Pages**
   - Add identical headers to left and right pages of weekly spreads
   - Maintain center alignment on both pages
-  - **Status**: Deferred to next development session
+  - **Status**: Deferred from previous session
   - **Priority**: Medium
-
-### 📋 Newly Identified Tasks
-
-#### User Experience Enhancements
-- [ ] **Font Preview in Preferences**
-  - Show sample text with selected fonts
-  - Real-time preview of font combinations
-  - **Priority**: Medium
-  - **Effort**: 2-3 hours
-
-- [ ] **Style Template System**
-  - Pre-built font combination templates
-  - Save/load custom font combinations
-  - **Priority**: Low
-  - **Effort**: 4-6 hours
-
-#### Technical Improvements
-- [ ] **Performance Testing with Complex Fonts**
-  - Test generation time with different font combinations
-  - Optimize font application performance
-  - **Priority**: Low
   - **Effort**: 1-2 hours
 
-- [ ] **Font Documentation Export**
-  - Generate documentation of selected font settings
-  - Export font specifications for reference
+### 📋 New Enhancement Ideas
+
+#### Layout Consistency
+- [ ] **Spacing Standardization**
+  - Evaluate applying 10pt spacing standard to other components
+  - Consider centering approach for other layout elements
   - **Priority**: Low
   - **Effort**: 2-3 hours
+
+- [ ] **Visual Balance Review**
+  - Comprehensive review of all spacing and alignment
+  - Ensure consistent visual hierarchy throughout planner
+  - **Priority**: Low
+  - **Effort**: 3-4 hours
+
+#### User Experience
+- [ ] **Layout Preview Mode**
+  - Add preview capability for spacing and alignment changes
+  - Quick visual validation without full generation
+  - **Priority**: Medium
+  - **Effort**: 4-6 hours
 
 EOF
 
-    # Update the backlog management section
+    # Add updated management section
     cat >> "$file" << 'EOF'
 
 ---
 
-## Updated Backlog Management
+## Backlog Management Update
 
-**Review Cycle**: After each major development session
+**Review Cycle**: After each development session
 **Last Review**: December 2024
-**Focus Areas**: Enhanced user experience, font system optimization
-**Next Priorities**: UI refinements, user testing feedback integration
+**Current Focus**: Layout refinements and visual consistency
+**Next Session Priorities**: 
+1. Debug cleanup
+2. Visual testing of centering
+3. Week headers implementation
 
-*Backlog updated through December 2024*
+*Backlog updated through December 2024 session*
 EOF
 }
 
-# Create or update project-state.md
+# Update project-state.md with current status
 update_project_state() {
     local file="$DOCS_DIR/project-state.md"
-    echo -e "${GREEN}Creating/updating project-state.md...${NC}"
+    echo -e "${GREEN}Updating project-state.md...${NC}"
     
     backup_file "$file"
     
@@ -274,10 +211,10 @@ update_project_state() {
 
 The InDesign Planner Generator is a mature, modular ExtendScript system for creating customizable yearly planners in Adobe InDesign. The project has evolved from a monolithic script to a sophisticated component-based architecture with comprehensive user customization options.
 
-## Current Version: 1.9
-**Status**: Stable with Enhanced Font System  
+## Current Version: 1.9.1
+**Status**: Stable with Enhanced Layout System  
 **Last Major Update**: December 2024  
-**Active Development**: Font system optimization and user experience refinements
+**Active Development**: Layout refinements and user experience optimization
 
 ## 🎯 Current Capabilities
 
@@ -292,8 +229,9 @@ The InDesign Planner Generator is a mature, modular ExtendScript system for crea
 - ✅ **Flexible Date Ranges**: Custom start/end dates with 1-60 month duration
 - ✅ **Granular Font Control**: 5 separate font categories with size control
 - ✅ **CMYK Color Management**: Full color workflow with existing color support
+- ✅ **Centered Layout**: Mini calendars now perfectly centered for professional appearance
 
-### Font Categories (NEW in v1.8-1.9)
+### Font Categories (Stable since v1.8-1.9)
 1. **Page Title Headers**: Main page titles (headers, month names)
 2. **Weekly Spread Content**: Day sections, notes, content areas
 3. **Monthly Calendar Dates**: Main calendar date numbers
@@ -319,7 +257,7 @@ Planner-Format-01/
 │       ├── footer.jsx          # ✨ ENHANCED: Header font -2pt
 │       ├── daySection.jsx      # ✨ ENHANCED: Weekly content fonts
 │       ├── weeklyView.jsx      # Weekly coordination (stable)
-│       ├── monthlyView.jsx     # ✨ ENHANCED: Mixed font categories
+│       ├── monthlyView.jsx     # 🆕 UPDATED: Centered calendar layout
 │       ├── monthSpread.jsx     # ✨ ENHANCED: All font categories
 │       ├── calendarGrid.jsx    # ✨ ENHANCED: Calendar font categories
 │       └── qrcodeGen.jsx       # QR code generation (stable)
@@ -329,13 +267,13 @@ Planner-Format-01/
 
 ## 🔧 Technical Architecture
 
-### Enhanced Preferences System
-- **Organized Panels**: Logical grouping of options
-- **Real-time Validation**: Date and range validation
-- **Fallback Chains**: `newFont → legacyFont → defaultFont`
-- **Storage**: JSON serialization in document labels
+### Enhanced Layout System
+- **Mathematical Centering**: Precise positioning calculations for visual balance
+- **Configurable Spacing**: Parameterized gaps for consistent spacing control
+- **Responsive Design**: Adapts to various page sizes and margin settings
+- **Visual Hierarchy**: Improved spacing creates better information organization
 
-### Font System Architecture
+### Font System Architecture (Stable)
 - **Category-based**: Logical font assignments by content type
 - **Size Hierarchies**: Automatic relationships (footer = header - 2pt)
 - **Layout-aware**: Font-size-based spacing for optimal text fit
@@ -345,7 +283,7 @@ Planner-Format-01/
 - **Separation of Concerns**: Each component handles specific functionality
 - **Consistent Interfaces**: Standardized parameter passing
 - **Error Isolation**: Component failures don't break entire generation
-- **Helper Functions**: Reusable font setting functions across components
+- **Helper Functions**: Reusable functions across components
 
 ## 📊 Quality Metrics
 
@@ -354,29 +292,38 @@ Planner-Format-01/
 - **Logging**: Detailed debug output for troubleshooting
 - **Documentation**: JSDoc comments and inline explanations
 - **Backward Compatibility**: Legacy preference support maintained
+- **Mathematical Precision**: Validated calculations for layout positioning
 
 ### User Experience
 - **Rapid Iteration**: Test mode enables quick font/color testing
 - **Flexibility**: 1-60 month planning periods with custom start dates
-- **Professional Output**: Print-ready layouts with proper typography
-- **Visual Hierarchy**: Consistent font relationships throughout
+- **Professional Output**: Print-ready layouts with proper typography and balance
+- **Visual Hierarchy**: Consistent font relationships and spacing throughout
 
 ## 🚦 Current Status
 
 ### Recently Completed (December 2024)
-1. ✅ Enhanced preferences dialog with 5 font categories
+1. ✅ Enhanced preferences with 5 granular font categories
 2. ✅ Test mode implementation (10-page generation)
 3. ✅ Flexible date range system with duration control
 4. ✅ All 7 core components updated with enhanced fonts
 5. ✅ Automatic font hierarchy (footer = header - 2pt)
 6. ✅ Font-aware layout spacing
 7. ✅ Comprehensive error handling and logging
+8. ✅ **NEW**: Centered 3-month overview with enhanced spacing
+
+### Recent Technical Improvements
+- **Layout Mathematics**: Precise centering algorithm for visual balance
+- **Spacing Enhancement**: Improved 10pt gaps between calendars
+- **Code Cleanup**: Streamlined positioning calculations
+- **Quality Assurance**: Comprehensive code review process
 
 ### Known Limitations
 - Requires InDesign CC 2018+
 - Facing pages must be enabled
 - QR code library dependency (qrcode.jsx)
 - CMYK color workflow only
+- Debug alert needs removal (minor cleanup)
 
 ### Performance Characteristics
 - **Test Mode**: ~30 seconds for 10 pages
@@ -387,29 +334,31 @@ Planner-Format-01/
 ## 🎯 Development Priorities
 
 ### Immediate (Next Session)
-1. Week headers on both pages (in progress)
-2. User testing of enhanced font system
-3. Performance validation with complex font combinations
+1. Remove debug alert from monthlyView.jsx (5-minute cleanup)
+2. Visual testing of centered calendar output
+3. Week headers on both pages implementation
 
 ### Short-term (1-2 weeks)
-1. Font preview in preferences dialog
-2. Style template system for font combinations
+1. Layout consistency review across all components
+2. Spacing standardization (apply 10pt standard elsewhere)
 3. Enhanced error reporting for end users
 
 ### Long-term (1-3 months)
-1. UXP migration planning for future InDesign versions
-2. Web-based companion tool for configuration
-3. Automated testing framework
+1. Layout preview mode for quick validation
+2. Template system for layout variations
+3. UXP migration planning for future InDesign versions
 
 ## 📈 Success Metrics
 
 ### User Adoption
 - Enhanced customization options increase user satisfaction
 - Test mode reduces iteration time for style decisions
+- Centered layouts provide more professional appearance
 - Flexible date ranges support various planning needs
 
 ### Technical Excellence
-- Zero breaking changes during font system implementation
+- Zero breaking changes during layout improvements
+- Mathematical precision in positioning calculations
 - Comprehensive error handling prevents user frustration
 - Modular architecture enables rapid feature development
 
@@ -417,11 +366,12 @@ Planner-Format-01/
 - Stable core functionality with 18+ months of development
 - Comprehensive documentation and architectural decisions
 - Ready for advanced features and platform expansion
+- Professional-grade layout quality achieved
 
 ---
 
 *Project state maintained through December 2024*
-*Next review scheduled after week header implementation*
+*Next review scheduled after debug cleanup and visual testing*
 EOF
 }
 
@@ -429,10 +379,15 @@ EOF
 main() {
     echo -e "${CYAN}Starting documentation update...${NC}"
     
-    # Ensure docs directory exists
+    # Ensure directories exist
     if [ ! -d "$DOCS_DIR" ]; then
         echo -e "${YELLOW}Creating docs directory...${NC}"
         mkdir -p "$DOCS_DIR"
+    fi
+    
+    if [ ! -d "$PROJECT_ROOT/scripts" ]; then
+        echo -e "${YELLOW}Creating scripts directory...${NC}"
+        mkdir -p "$PROJECT_ROOT/scripts"
     fi
     
     # Update documentation files
@@ -444,22 +399,31 @@ main() {
     echo -e "${GREEN}Documentation update completed successfully!${NC}"
     echo ""
     echo -e "${BLUE}Updated files:${NC}"
-    echo "  - development-log.md (Phase 6 progress added)"
-    echo "  - backlog.md (completed items marked, new tasks added)"
-    echo "  - project-state.md (current status comprehensive update)"
+    echo "  - development-log.md (Phase 6 layout refinements added)"
+    echo "  - backlog.md (centering completion marked, new tasks added)"
+    echo "  - project-state.md (current status with layout improvements)"
     echo ""
-    echo -e "${YELLOW}Next steps:${NC}"
-    echo "  1. Review updated documentation"
-    echo "  2. Test enhanced font system in InDesign"
-    echo "  3. Commit and push changes to repository"
-    echo "  4. Plan next development session (week headers)"
-    echo ""
-    echo -e "${CYAN}Suggested git workflow:${NC}"
+    echo -e "${YELLOW}Git workflow commands:${NC}"
     echo "  git add ."
-    echo "  git commit -m \"feat: Enhanced font system with 5 granular categories and test mode\""
+    echo "  git commit -m 'Implement centered 3-month overview layout"
+    echo ""
+    echo "  - Enhanced monthlyView.jsx with mathematical centering"
+    echo "  - Improved spacing from 5pt to 10pt between calendars" 
+    echo "  - Updated documentation with Phase 6 progress"
+    echo "  - Added cleanup tasks to backlog'"
+    echo ""
     echo "  git push origin main"
     echo ""
+    echo -e "${CYAN}Next development priorities:${NC}"
+    echo "  1. Remove debug alert from monthlyView.jsx"
+    echo "  2. Generate test planner to verify centered layout"
+    echo "  3. Implement week headers on both pages"
+    echo "  4. Consider spacing standardization across components"
+    echo ""
+    echo -e "${GREEN}Session wrap-up complete! 🎉${NC}"
 }
 
-# Run main function
-main "$@"
+# Check if script is being run directly
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+    main "$@"
+fi

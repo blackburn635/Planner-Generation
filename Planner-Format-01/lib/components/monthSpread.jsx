@@ -464,6 +464,7 @@ var MonthSpread = (function() {
             Utils.applyTextFormatting(nextMonthHeader.texts.item(0), miniTitleFontSettings.font, miniTitleFontSettings.color);
             nextMonthHeader.texts.item(0).pointSize = miniTitleFontSettings.size;
             nextMonthHeader.texts.item(0).justification = Justification.CENTER_ALIGN;
+            Utils.setupTextFrame(nextMonthHeader); // Add this line for vertical centering
             
             // Create mini calendar using CalendarGrid component (handles mini calendar date fonts automatically)
             CalendarGrid.createMiniMonthCalendar(
@@ -498,6 +499,7 @@ var MonthSpread = (function() {
             Utils.applyTextFormatting(nextNextMonthHeader.texts.item(0), miniTitleFontSettings.font, miniTitleFontSettings.color);
             nextNextMonthHeader.texts.item(0).pointSize = miniTitleFontSettings.size;
             nextNextMonthHeader.texts.item(0).justification = Justification.CENTER_ALIGN;
+            Utils.setupTextFrame(nextNextMonthHeader); // Add this line for vertical centering
             
             // Create mini calendar using CalendarGrid component
             CalendarGrid.createMiniMonthCalendar(
