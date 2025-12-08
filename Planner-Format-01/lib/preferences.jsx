@@ -220,6 +220,23 @@ var Preferences = (function() {
                 checkedState: true
             });
             
+            // =================================================================
+            // MONTH TITLE PAGE PANEL
+            // =================================================================
+            var monthTitlePanel = column.borderPanels.add();
+            monthTitlePanel.staticTexts.add({staticLabel: "MONTH TITLE PAGE"});
+            var includeMonthTitleCheckbox = monthTitlePanel.checkboxControls.add({
+                staticLabel: "Include Month Title Page before each monthly spread",
+                checkedState: false
+            });
+            monthTitlePanel.staticTexts.add({staticLabel: "Month Title Font:"});
+            var monthTitleFontDropdown = monthTitlePanel.dropdowns.add({
+                stringList: fontArray,
+                selectedIndex: 0
+            });
+            monthTitlePanel.staticTexts.add({staticLabel: "Month Title Size (pt):"});
+            var monthTitleSizeField = monthTitlePanel.realEditboxes.add({editValue: 72});
+            
             // Show dialog
             if (dialog.show()) {
                 // Calculate start and end dates
@@ -279,6 +296,11 @@ var Preferences = (function() {
                     
                     // EXISTING: Options (preserved)
                     includeMonthly: includeMonthlyCheckbox.checkedState,
+                    
+                    // MONTH TITLE PAGE OPTIONS
+                    includeMonthTitlePage: includeMonthTitleCheckbox.checkedState,
+                    monthTitleFont: fontArray[monthTitleFontDropdown.selectedIndex],
+                    monthTitleSize: monthTitleSizeField.editValue,
                     
                     // LEGACY: Map new settings to old names for backward compatibility
                     titleFont: fontArray[pageTitleFontDropdown.selectedIndex],
@@ -381,6 +403,11 @@ var Preferences = (function() {
             headerColorName: "HeaderColor",
             useExistingColors: false,
             includeMonthly: true,
+            
+            // MONTH TITLE PAGE OPTIONS
+            includeMonthTitlePage: false,
+            monthTitleFont: "Minion Pro",
+            monthTitleSize: 72,
             
             // LEGACY: Backward compatibility mappings
             titleFont: "Minion Pro",

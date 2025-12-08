@@ -557,9 +557,109 @@ var MonthSpread = (function() {
         };
     }
     
+    /**
+     * Creates a Month Title page with the month name centered on the page
+     * @param {Document} doc - The InDesign document
+     * @param {Date} monthDate - First day of the month
+     * @param {Number} pageIndex - Index of the page to create
+     * @param {Object} pageMetrics - Page size and margin information
+     * @param {Object} userPrefs - User preferences including font settings
+     * @returns {Number} The next available page index
+     */
+    function createMonthTitlePage(doc, monthDate, pageIndex, pageMetrics, userPrefs) {
+        // Skip if user has disabled month title pages
+        if (!userPrefs.includeMonthTitlePage) {
+            return pageIndex;
+        }
+        
+        try {
+            // Add page if needed
+            while (doc.pages.length <= pageIndex) {
+                doc.pages.add();
+            }
+            
+            var page = doc.pages.item(pageIndex);
+            
+            // Get page-specific metrics for binding-aware margins
+            var titlePageMetrics = Layout.calculatePageMetricsForPage ? 
+                Layout.calculatePageMetricsForPage(doc, page) : pageMetrics;
+            
+            // Get month name
+            var monthNames = ["January", "February", "March", "April", "May", "June",
+                            "July", "August", "September", "October", "November", "December"];
+            var monthName = monthNames[monthDate.getMonth()];
+            
+            // Get font settings with fallbacks
+            var titleFont = userPrefs.monthTitleFont || userPrefs.pageTitleFont || userPrefs.titleFont || "Myriad Pro";
+            var titleSize = userPrefs.monthTitleSize || 72;
+            var titleColor = userPrefs.pageTitleColor || userPrefs.titleFontColor || "Black";
+            
+            // Calculate page center
+            var pageBounds = page.bounds; // [top, left, bottom, right]
+            var pageTop = pageBounds[0];
+            var pageLeft = pageBounds[1];
+            var pageBottom = pageBounds[2];
+            var pageRight = pageBounds[3];
+            
+            var pageWidth = pageRight - pageLeft;
+            var pageHeight = pageBottom - pageTop;
+            
+            // Create text frame for month title - full page width for horizontal centering
+            var frameMargin = 36; // 0.5 inch margin from edges
+            var frameHeight = titleSize * 1.5; // Enough height for the text
+            
+            // Center vertically
+            var frameTop = pageTop + (pageHeight / 2) - (frameHeight / 2);
+            var frameBottom = frameTop + frameHeight;
+            
+            var titleFrame = page.textFrames.add({
+                geometricBounds: [frameTop, pageLeft + frameMargin, frameBottom, pageRight - frameMargin],
+                contents: monthName
+            });
+            
+            // Apply text formatting
+            try {
+                var text = titleFrame.texts.item(0);
+                text.appliedFont = app.fonts.itemByName(titleFont);
+                text.pointSize = titleSize;
+                text.justification = Justification.CENTER_ALIGN;
+                
+                // Apply color
+                try {
+                    var colorObj = doc.colors.itemByName(titleColor);
+                    if (colorObj.isValid) {
+                        text.fillColor = colorObj;
+                    }
+                } catch (colorErr) {
+                    // Use default black if color not found
+                    text.fillColor = doc.colors.itemByName("Black");
+                }
+            } catch (fontErr) {
+                $.writeln("[MonthTitlePage] Font error, using defaults: " + fontErr.message);
+            }
+            
+            // Center vertically within frame
+            titleFrame.textFramePreferences.verticalJustification = VerticalJustification.CENTER_ALIGN;
+            
+            // Set up text frame options
+            titleFrame.textFramePreferences.firstBaselineOffset = FirstBaseline.CAP_HEIGHT;
+            
+            $.writeln("[MonthTitlePage] Created title page for " + monthName + 
+                     " with font: " + titleFont + ", size: " + titleSize + "pt");
+            
+            return pageIndex + 1;
+            
+        } catch (e) {
+            $.writeln("[MonthTitlePage] Error creating month title page: " + e.message);
+            // Return same index to continue without title page
+            return pageIndex;
+        }
+    }
+    
     // Return public interface
     return {
         createMonthSpread: createMonthSpread,
+        createMonthTitlePage: createMonthTitlePage,
         getMiniCalendarTitleFontSettings: getMiniCalendarTitleFontSettings,
         getMonthlyCalendarFontSettings: getMonthlyCalendarFontSettings,
         getWeeklyContentFontSettings: getWeeklyContentFontSettings
