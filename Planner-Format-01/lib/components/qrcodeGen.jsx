@@ -164,6 +164,10 @@ var QRCodeGen = (function() {
         
         // Place the SVG in the InDesign document
         var placedItem = page.place(qrFile, [x, y])[0];
+
+        // EMBED THE GRAPHIC to prevent missing link errors
+        placedItem.embed();
+        
         
         // Resize the placed QR code to our desired size
         placedItem.resize(
