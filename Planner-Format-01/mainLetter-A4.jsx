@@ -169,8 +169,15 @@ function generateTestPlanner(doc, startDate, pageMetrics, userPrefs) {
     
     $.writeln("TEST MODE: Generating maximum " + maxPages + " pages for preview");
     
-    // Generate one monthly spread (2 pages) and a few weekly spreads
+    // Generate one monthly spread (2-3 pages depending on title page) and a few weekly spreads
     if (pagesGenerated < maxPages - 1) {
+        // Create Month Title Page first (if enabled)
+        if (userPrefs.includeMonthTitlePage) {
+            currentPageIndex = MonthSpread.createMonthTitlePage(doc, currentDate, currentPageIndex, pageMetrics, userPrefs);
+            pagesGenerated += 1;
+            $.writeln("TEST MODE: Generated month title page, total pages: " + pagesGenerated);
+        }
+        
         // Create one monthly spread for testing
         currentPageIndex = MonthSpread.createMonthSpread(doc, currentDate, currentPageIndex, pageMetrics, userPrefs);
         pagesGenerated += 2; // Monthly spread uses 2 pages
@@ -233,6 +240,10 @@ function generateEnhancedPlanner(doc, startDate, endDate, pageMetrics, userPrefs
         
         // Create monthly spread for the month if monthly spreads are enabled
         if (userPrefs.includeMonthly) {
+            // Create Month Title Page first (if enabled)
+            currentPageIndex = MonthSpread.createMonthTitlePage(doc, currentDate, currentPageIndex, pageMetrics, userPrefs);
+            
+            // Then create the monthly spread
             currentPageIndex = MonthSpread.createMonthSpread(doc, currentDate, currentPageIndex, pageMetrics, userPrefs);
         }
         
